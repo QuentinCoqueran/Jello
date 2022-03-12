@@ -1,4 +1,4 @@
-package fr.pa3al2g3.esgi.jello;
+package fr.pa3al2g3.esgi.jello.enumerator;
 
 public enum Importance {
     LOW("Low"),
