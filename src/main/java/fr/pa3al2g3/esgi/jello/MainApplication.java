@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello;
 
+import fr.pa3al2g3.esgi.jello.enumerator.Importance;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
