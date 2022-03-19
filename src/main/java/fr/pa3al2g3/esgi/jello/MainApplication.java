@@ -1,14 +1,9 @@
 package fr.pa3al2g3.esgi.jello;
 
-import fr.pa3al2g3.esgi.jello.enumerator.Importance;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class MainApplication extends Application {
     private static Stage stage;

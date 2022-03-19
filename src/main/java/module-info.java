@@ -9,6 +9,7 @@ module fr.pa3al2g3.esgi.jello {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    requires java.sql;
 
     opens fr.pa3al2g3.esgi.jello to javafx.fxml;
     exports fr.pa3al2g3.esgi.jello;
