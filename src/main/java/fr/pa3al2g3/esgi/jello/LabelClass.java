@@ -1,11 +1,11 @@
 package fr.pa3al2g3.esgi.jello;
 
-public class Label {
+public class LabelClass {
 
     private final String title;
     private final String color;
 
-    public Label(String title, String color) {
+    public LabelClass(String title, String color) {
         this.title = title;
         this.color = color;
     }
