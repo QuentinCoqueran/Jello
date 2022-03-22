@@ -9,17 +9,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class MainController {
     @FXML
-    private Label welcomeText;
+    private Button initButton;
 
     @FXML
-    protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to JavaFX Application!");
+    public void onInitButtonClick(ActionEvent event) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("table.fxml"));
+        Parent root = (Parent) fxmlLoader.load();
+        MainApplication.setScene(new Scene(root));
+        TableModel home = new TableModel();
+        TableController.setTableModel(home);
     }
-
-    @FXML
-    private Button go_to_incription;
-
 
 }

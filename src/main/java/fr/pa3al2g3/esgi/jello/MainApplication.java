@@ -2,26 +2,33 @@ package fr.pa3al2g3.esgi.jello;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class MainApplication extends Application {
     private static Stage stage;
+    private static Rectangle2D screenBounds;
 
     @Override
     public void start(Stage stage) throws Exception {
         MainApplication.stage = stage;
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("connection.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Hello!");
+        Parent root = FXMLLoader.load(getClass().getResource("main-view.fxml"));
+        Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setMaximized(true);
+        MainApplication.screenBounds = Screen.getPrimary().getBounds();
         stage.show();
-
     }
 
     public static void setScene(Scene scene) {
         stage.setScene(scene);
+    }
+
+    public static Scene getScene() {
+        return stage.getScene();
     }
 
     public static void main(String[] args) {

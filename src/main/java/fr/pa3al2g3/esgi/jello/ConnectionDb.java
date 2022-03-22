@@ -12,7 +12,7 @@ public class ConnectionDb {
             String user = "root";
             String password = "root";
 
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             java.sql.Connection conn = DriverManager.getConnection(url, user, password);
             System.out.print("connect ok");
             return conn;

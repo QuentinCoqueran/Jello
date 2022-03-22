@@ -29,6 +29,10 @@
                 <RowConstraints minHeight="10.0" percentHeight="33.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
+            <Label fx:id="errorConnect" textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font></Label>
                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Connexion" GridPane.columnIndex="1" GridPane.rowIndex="1">
                     <font>
                         <Font name="System Bold" size="26.0" />
@@ -57,8 +61,8 @@
                         <Font name="System Bold" size="20.0" />
                     </font>
                 </Text>
-                <TextField prefHeight="33.0" prefWidth="105.0" promptText="Username" GridPane.columnIndex="1" />
-                <PasswordField prefHeight="33.0" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="pseudo" prefHeight="33.0" prefWidth="105.0" promptText="Username" GridPane.columnIndex="1" />
+                <PasswordField fx:id="password" prefHeight="33.0" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             </children>
         </GridPane>
         <GridPane GridPane.columnIndex="2" GridPane.rowIndex="2">
@@ -73,7 +77,7 @@
                 <RowConstraints minHeight="10.0" percentHeight="33.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="39.0" prefWidth="70.0" text="Valider" GridPane.columnIndex="1" />
+                <Button fx:id="connect" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#connectButton" prefHeight="39.0" prefWidth="70.0" text="Valider" GridPane.columnIndex="1" />
                 <Button fx:id="go_to_insciption" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goInscription" prefHeight="39.0" text="Inscription" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             </children>
         </GridPane>
