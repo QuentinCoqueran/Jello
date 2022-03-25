@@ -14,4 +14,8 @@ module fr.pa3al2g3.esgi.jello {
     exports fr.pa3al2g3.esgi.jello;
     exports fr.pa3al2g3.esgi.jello.enumerator;
     opens fr.pa3al2g3.esgi.jello.enumerator to javafx.fxml;
+    exports fr.pa3al2g3.esgi.jello.model;
+    opens fr.pa3al2g3.esgi.jello.model to javafx.fxml;
+    exports fr.pa3al2g3.esgi.jello.controller;
+    opens fr.pa3al2g3.esgi.jello.controller to javafx.fxml;
 }
