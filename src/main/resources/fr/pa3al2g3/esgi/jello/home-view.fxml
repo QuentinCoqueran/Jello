@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane fx:id="main_grid" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="28.13" prefWidth="100.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -74,7 +75,114 @@
                   </GridPane>
                </children>
             </GridPane>
-            <ScrollPane fx:id="project_scroll_pane" blendMode="COLOR_BURN" prefHeight="588.0" prefWidth="388.0" GridPane.rowIndex="3" />
+            <ScrollPane fx:id="project_scroll_pane" prefHeight="588.0" prefWidth="388.0" GridPane.rowIndex="3" />
+         </children>
+      </GridPane>
+      <GridPane GridPane.columnIndex="1">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" percentHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <GridPane GridPane.rowIndex="1">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <ImageView fitHeight="361.0" fitWidth="392.0" pickOnBounds="true" preserveRatio="true" smooth="false" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                     <image>
+                        <Image url="@assets/logoJello.png" />
+                     </image></ImageView>
+               </children>
+            </GridPane>
+            <Text stroke="BLACK" strokeMiterLimit="0.0" text="Creer un nouveau projet pour commencer du début" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="TOP">
+               <font>
+                  <Font name="Roboto Light" size="20.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+            </Text>
+            <Text stroke="BLACK" text="Ouvrez un projet déjà existant dans l’explorateur de fichier" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+               <font>
+                  <Font name="Roboto Light" size="20.0" />
+               </font>
+            </Text>
+            <Text stroke="BLACK" text="Creer un projet" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets right="300.0" top="50.0" />
+               </GridPane.margin>
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+            </Text>
+            <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="TOP">
+               <GridPane.margin>
+                  <Insets right="300.0" />
+               </GridPane.margin>
+               <image>
+                  <Image url="@assets/add-circle.png" />
+               </image>
+            </ImageView>
+            <Text stroke="BLACK" text="Ouvrir un projet" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets top="50.0" />
+               </GridPane.margin>
+            </Text>
+            <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="TOP">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+               <image>
+                  <Image url="@assets/folder.png" />
+               </image>
+            </ImageView>
+            <Text stroke="BLACK" text="Configuration" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+               <font>
+                  <Font name="Roboto Light" size="15.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="300.0" top="50.0" />
+               </GridPane.margin>
+            </Text>
+            <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="TOP">
+               <GridPane.margin>
+                  <Insets left="300.0" />
+               </GridPane.margin>
+               <image>
+                  <Image url="@assets/settings.png" />
+               </image>
+            </ImageView>
+            <Button mnemonicParsing="false" opacity="0.0" prefHeight="90.0" prefWidth="110.0" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="TOP" />
+            <Button mnemonicParsing="false" opacity="0.0" prefHeight="90.0" prefWidth="110.0" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets right="300.0" />
+               </GridPane.margin>
+            </Button>
+            <Button mnemonicParsing="false" opacity="0.0" prefHeight="90.0" prefWidth="110.0" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <GridPane.margin>
+                  <Insets left="300.0" />
+               </GridPane.margin>
+            </Button>
          </children>
       </GridPane>
    </children>
