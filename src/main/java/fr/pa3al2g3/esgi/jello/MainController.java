@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello;
 
+import fr.pa3al2g3.esgi.jello.manager.ModelManager;
 import fr.pa3al2g3.esgi.jello.model.HomeModel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,6 +21,6 @@ public class MainController {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("home-view.fxml"));
         Parent root = (Parent) fxmlLoader.load();
         MainApplication.setScene(new Scene(root));
-        HomeModel home = new HomeModel();
+        MainApplication.getModelManager().getHomeModel().init();
     }
 }

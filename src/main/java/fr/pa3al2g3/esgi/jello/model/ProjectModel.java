@@ -7,19 +7,24 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 
 public class ProjectModel {
 
     private GridPane gridFavoris;
+    private String projetName;
 
     public ProjectModel() {
         this.gridFavoris = new GridPane();
-        init();
     }
 
-    private void init(){
+    public void init(String str){
+        Text projectNameText = (Text) MainApplication.getScene().lookup("#project_name");
+        Font tempFont = projectNameText.getFont();
+        projectNameText.setText(str);
+        projectNameText.setFont(tempFont);
         ScrollPane scrollFavoris = (ScrollPane) MainApplication.getScene().lookup("#favoris");
         gridFavoris.setPrefHeight(225);
         gridFavoris.setPrefWidth(340);

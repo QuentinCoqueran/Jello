@@ -1,8 +1,12 @@
 package fr.pa3al2g3.esgi.jello.model;
 
 import fr.pa3al2g3.esgi.jello.MainApplication;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -13,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class HomeModel {
@@ -20,32 +25,14 @@ public class HomeModel {
 
     public HomeModel() {
         this.projects = new ArrayList<>();
-        addProject("Test");
-        addProject("aBc");
-        addProject("Test");
-        addProject("aBc");
-        addProject("Test");
-        addProject("aBc");
-        addProject("Test");
-        addProject("aBc");
-        addProject("Test");
-        addProject("aBc");
-        addProject("Test");
-        addProject("aBc");
-        addProject("Test");
-
-
-
-
-
-        init();
+        //this.projects.add("test_tas");
     }
 
-    private void addProject(String projectName) {
+    public void addProject(String projectName) {
         this.projects.add(projectName);
     }
 
-    private void init() {
+    public void init() {
         ScrollPane scrollPane = (ScrollPane) MainApplication.getScene().lookup("#project_scroll_pane");
         scrollPane.setStyle("-fx-background-color: #FFE4B5");
         scrollPane.setStyle("-fx-background: #FFE4B5");
@@ -74,6 +61,20 @@ public class HomeModel {
             btn.setStyle("-fx-background-color: #FF8248");
             btn.setPrefHeight(this.calcHeigth(74));
             btn.setPrefWidth(this.calcWidth(372));
+            btn.setMnemonicParsing(false);
+            btn.setOnAction(new EventHandler<ActionEvent>() {
+                @Override public void handle(ActionEvent e) {
+                    FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("project-view.fxml"));
+                    Parent root = null;
+                    try {
+                        root = (Parent) fxmlLoader.load();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    MainApplication.setScene(new Scene(root));
+                    MainApplication.getModelManager().getProjectModel().init(btn.getText());
+                }
+            });
 
             if(projects.size() >= 9){
                 emptySpaceButtonLeft.setPrefWidth(this.calcWidth(53));

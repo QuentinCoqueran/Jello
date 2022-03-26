@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello;
 
+import fr.pa3al2g3.esgi.jello.manager.ModelManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -15,9 +16,13 @@ public class MainApplication extends Application {
     private static Stage stage;
     private static Rectangle2D screenBounds;
     private static Window window;
+    private static Class instance;
+    private static ModelManager modelManager;
     @Override
     public void start(Stage stage) throws IOException {
+        MainApplication.instance = getClass();
         MainApplication.stage = stage;
+        MainApplication.modelManager = new ModelManager();
         Parent root = FXMLLoader.load(getClass().getResource("main-view.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -40,6 +45,14 @@ public class MainApplication extends Application {
 
     public static Window getWindow() {
         return window;
+    }
+
+    public static Class getInstance() {
+        return instance;
+    }
+
+    public static ModelManager getModelManager() {
+        return modelManager;
     }
 
     public static void main(String[] args) {launch();}
