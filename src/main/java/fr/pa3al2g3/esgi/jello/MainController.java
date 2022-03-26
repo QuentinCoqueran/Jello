@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello;
 
+
 import fr.pa3al2g3.esgi.jello.manager.ModelManager;
 import fr.pa3al2g3.esgi.jello.model.HomeModel;
 import javafx.event.ActionEvent;
@@ -9,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 
@@ -23,4 +25,9 @@ public class MainController {
         MainApplication.setScene(new Scene(root));
         MainApplication.getModelManager().getHomeModel().init();
     }
+
+    @FXML
+    private Button go_to_incription;
+
+
 }
