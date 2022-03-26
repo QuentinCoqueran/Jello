@@ -1,9 +1,6 @@
 package fr.pa3al2g3.esgi.jello.controller;
 
-import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
-import fr.pa3al2g3.esgi.jello.model.HomeModel;
-import fr.pa3al2g3.esgi.jello.model.ProjectModel;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,13 +10,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.util.Pair;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.Optional;
 
 public class HomeController {
