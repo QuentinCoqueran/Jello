@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello.model;
 
+import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,8 +16,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 
 public class ProjectModel {
@@ -28,11 +32,28 @@ public class ProjectModel {
         this.gridFavoris = new GridPane();
     }
 
-    public void init(String str) {
+    public void init(int projectId){
+
         Text projectNameText = (Text) MainApplication.getScene().lookup("#project_name");
         Font tempFont = projectNameText.getFont();
-        projectNameText.setText(str);
-        projectNameText.setFont(tempFont);
+
+
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection conn = connectNow.connect();
+        String selectQuery = "SELECT projectName FROM project_trello WHERE id = " + projectId;
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet queryOutput = statement.executeQuery(selectQuery);
+            while (queryOutput.next()) {
+                projectNameText.setText(queryOutput.getString("projectName"));
+                projectNameText.setFont(tempFont);
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+
         ScrollPane scrollFavoris = (ScrollPane) MainApplication.getScene().lookup("#favoris");
         gridFavoris.setPrefHeight(225);
         gridFavoris.setPrefWidth(340);

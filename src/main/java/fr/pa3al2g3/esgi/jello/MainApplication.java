@@ -24,7 +24,6 @@ public class MainApplication extends Application {
     public void start(Stage stage) throws IOException {
         MainApplication.instance = getClass();
         MainApplication.stage = stage;
-
         MainApplication.modelManager = new ModelManager();
         Parent root = FXMLLoader.load(getClass().getResource("connection-view.fxml"));
         Scene scene = new Scene(root);
