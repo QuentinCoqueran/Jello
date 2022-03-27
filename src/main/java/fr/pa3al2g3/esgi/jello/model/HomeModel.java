@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello.model;
 
+import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -8,6 +9,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
@@ -18,6 +20,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class HomeModel {
@@ -33,6 +39,21 @@ public class HomeModel {
     }
 
     public void init() {
+        projects.clear();
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection conn = connectNow.connect();
+        String selectQuery = "SELECT projectName FROM project_trello";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet queryOutput = statement.executeQuery(selectQuery);
+            while (queryOutput.next()) {
+                this.projects.add(queryOutput.getString("projectName"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
         ScrollPane scrollPane = (ScrollPane) MainApplication.getScene().lookup("#project_scroll_pane");
         scrollPane.setStyle("-fx-background-color: #FFE4B5");
         scrollPane.setStyle("-fx-background: #FFE4B5");
@@ -64,6 +85,34 @@ public class HomeModel {
             btn.setMnemonicParsing(false);
             btn.setOnAction(new EventHandler<ActionEvent>() {
                 @Override public void handle(ActionEvent e) {
+
+                    ConnectionDb connectNow = new ConnectionDb();
+                    Connection conn = connectNow.connect();
+                    String selectQuery = "SELECT id FROM project_trello WHERE projectName = '" + btn.getText() + "'";
+                    int projectId = -1;
+                    try {
+                        Statement statement = conn.createStatement();
+                        ResultSet queryOutput = statement.executeQuery(selectQuery);
+                        while (queryOutput.next()) {
+                            projectId = queryOutput.getInt("id");
+                        }
+
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+
+                    if(projectId == -1){
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Information");
+
+                        // Header Text: null
+                        alert.setHeaderText(null);
+                        alert.setContentText("Projet non trouvé");
+
+                        alert.showAndWait();
+                        return;
+                    }
+
                     FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("project-view.fxml"));
                     Parent root = null;
                     try {
@@ -76,7 +125,7 @@ public class HomeModel {
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
-                    MainApplication.getModelManager().getProjectModel().init(btn.getText());
+                    MainApplication.getModelManager().getProjectModel().init(projectId);
                 }
             });
 

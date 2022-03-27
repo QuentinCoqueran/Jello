@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello.controller;
 
+import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -13,12 +14,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HomeController {
+    private int projectId;
 
     @FXML
     public void onCreateButtonClick(ActionEvent event){
+        projectId = -1;
         Dialog<String> dialog = new Dialog<>();
         dialog.getDialogPane().setPrefWidth(250);
         dialog.setTitle("Nouveau projet");
@@ -50,11 +55,51 @@ public class HomeController {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == btnOk) {
-               /* ConnectionDb connectNow = new ConnectionDb();
-                Connection connectionDB = connectNow.connect();
-                String selectQuery = "SELECT id FROM PROJET WHERE name = " + projectName.getText();*/
-                // FAIRE UN CHECK
-                return projectName.getText();
+                ConnectionDb connectNow = new ConnectionDb();
+                Connection conn = connectNow.connect();
+                String selectQuery = "SELECT id FROM project_trello WHERE projectName = '" + projectName.getText() + "'";
+                boolean exist = false;
+
+                try {
+                    Statement statement = conn.createStatement();
+                    ResultSet queryOutput = statement.executeQuery(selectQuery);
+                    while (queryOutput.next()) {
+                        //ResultSet processing here
+                        exist = true;
+                    }
+
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+
+                if(!exist){
+
+
+                    try {
+                        String insertQuery = "INSERT INTO project_trello (projectName) VALUE ('"+ projectName.getText() + "')";
+                        Statement statement = conn.createStatement();
+                        statement.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
+                        ResultSet rs= statement.getGeneratedKeys();
+                        if (rs.next())
+                        {
+                            projectId = (int) rs.getLong(1);
+                        }
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+
+                    return projectName.getText();
+                }else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Information");
+
+                    // Header Text: null
+                    alert.setHeaderText(null);
+                    alert.setContentText("Ce projet existe déjà!");
+
+                    alert.showAndWait();
+                    return null;
+                }
             }
             return null;
         });
@@ -72,7 +117,7 @@ public class HomeController {
                 MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
                 MainApplication.getStage().setMaximized(true);
                 MainApplication.getModelManager().getHomeModel().addProject(str);
-                MainApplication.getModelManager().getProjectModel().init(str);
+                MainApplication.getModelManager().getProjectModel().init(projectId);
             } catch (IOException e) {
                 e.printStackTrace();
             }
