@@ -17,6 +17,10 @@ public class ProjectController {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("home-view.fxml"));
         Parent root = (Parent) fxmlLoader.load();
         MainApplication.setScene(new Scene(root));
+        MainApplication.getStage().setHeight(MainApplication.getScreenBounds().getHeight());
+        MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
+        MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
+        MainApplication.getStage().setMaximized(true);
         MainApplication.getModelManager().getHomeModel().init();
     }
 }

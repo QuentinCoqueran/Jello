@@ -68,10 +68,14 @@ public class HomeModel {
                     Parent root = null;
                     try {
                         root = (Parent) fxmlLoader.load();
+                        MainApplication.setScene(new Scene(root));
+                        MainApplication.getStage().setHeight(MainApplication.getScreenBounds().getHeight());
+                        MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
+                        MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
+                        MainApplication.getStage().setMaximized(true);
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
-                    MainApplication.setScene(new Scene(root));
                     MainApplication.getModelManager().getProjectModel().init(btn.getText());
                 }
             });

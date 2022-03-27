@@ -1,6 +1,9 @@
 
-package fr.pa3al2g3.esgi.jello;
+package fr.pa3al2g3.esgi.jello.controller;
 
+import fr.pa3al2g3.esgi.jello.ConnectionDb;
+import fr.pa3al2g3.esgi.jello.MainApplication;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 
 import java.sql.Connection;
@@ -23,20 +27,22 @@ public class ConnectionController {
     private Button go_to_incription;
 
     @FXML
+    private Button connect;
+
+    @FXML
     private TextField pseudo;
 
     @FXML
     private PasswordField password;
 
     @FXML
-    private Label errorConnect;
+    private Text errorConnect;
 
     public void goInscription(ActionEvent event) throws Exception {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("incription.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("incription-view.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
-            Rectangle2D screenSize = Screen.getPrimary().getVisualBounds();
-            MainApplication.setScene(new Scene(root1, screenSize.getWidth(), screenSize.getHeight()));
+            MainApplication.setScene(new Scene(root1));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,10 +63,17 @@ public class ConnectionController {
                 empty = false;
             }
             if (empty) {
-                errorConnect.setText("Erreur connection");
+                errorConnect.setText("Username/Password invalide");
             } else {
                 //si connection ok
-                errorConnect.setText("");
+                FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("home-view.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+                MainApplication.setScene(new Scene(root));
+                MainApplication.getStage().setHeight(MainApplication.getScreenBounds().getHeight());
+                MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
+                MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
+                MainApplication.getStage().setMaximized(true);
+                MainApplication.getModelManager().getHomeModel().init();
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -67,6 +67,10 @@ public class HomeController {
             try {
                 root = fxmlLoader.load();
                 MainApplication.setScene(new Scene(root));
+                MainApplication.getStage().setHeight(MainApplication.getScreenBounds().getHeight());
+                MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
+                MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
+                MainApplication.getStage().setMaximized(true);
                 MainApplication.getModelManager().getHomeModel().addProject(str);
                 MainApplication.getModelManager().getProjectModel().init(str);
             } catch (IOException e) {

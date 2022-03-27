@@ -53,7 +53,7 @@
                      <children>
                         <ImageView fitHeight="32.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="RIGHT">
                            <image>
-                              <Image url="@asset/return.png" />
+                              <Image url="@assets/return.png" />
                            </image>
                         </ImageView>
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Retour" GridPane.columnIndex="1" GridPane.halignment="LEFT">

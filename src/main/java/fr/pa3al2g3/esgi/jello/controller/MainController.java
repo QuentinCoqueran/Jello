@@ -1,6 +1,7 @@
-package fr.pa3al2g3.esgi.jello;
+package fr.pa3al2g3.esgi.jello.controller;
 
 
+import fr.pa3al2g3.esgi.jello.MainApplication;
 import fr.pa3al2g3.esgi.jello.manager.ModelManager;
 import fr.pa3al2g3.esgi.jello.model.HomeModel;
 import javafx.event.ActionEvent;
@@ -20,10 +21,7 @@ public class MainController {
 
     @FXML
     public void onInitButtonClick(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("home-view.fxml"));
-        Parent root = (Parent) fxmlLoader.load();
-        MainApplication.setScene(new Scene(root));
-        MainApplication.getModelManager().getHomeModel().init();
+
     }
 
     @FXML
