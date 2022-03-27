@@ -15,13 +15,16 @@ import java.io.IOException;
 public class MainApplication extends Application {
     private static Stage stage;
     private static Rectangle2D screenBounds;
+
     private static Window window;
     private static Class instance;
     private static ModelManager modelManager;
+
     @Override
     public void start(Stage stage) throws IOException {
         MainApplication.instance = getClass();
         MainApplication.stage = stage;
+
         MainApplication.modelManager = new ModelManager();
         Parent root = FXMLLoader.load(getClass().getResource("connection-view.fxml"));
         Scene scene = new Scene(root);
@@ -30,12 +33,14 @@ public class MainApplication extends Application {
         MainApplication.screenBounds = Screen.getPrimary().getBounds();
         stage.show();
         MainApplication.window = stage.getScene().getWindow();
+
     }
 
-    public static void setScene(Scene scene){
+    public static void setScene(Scene scene) {
         stage.setScene(scene);
     }
-    public static Scene getScene(){
+
+    public static Scene getScene() {
         return stage.getScene();
     }
 
@@ -47,21 +52,25 @@ public class MainApplication extends Application {
         return instance;
     }
 
+
     public static ModelManager getModelManager() {
         return modelManager;
-    }
 
-    public static Stage getStage() {
-        return stage;
-    }
+        }
 
-    public static Rectangle2D getScreenBounds() {
-        return screenBounds;
-    }
+        public static Stage getStage () {
+            return stage;
+        }
 
-    public static void setWindow(Window window) {
-        MainApplication.window = window;
-    }
+        public static Rectangle2D getScreenBounds () {
+            return screenBounds;
+        }
 
-    public static void main(String[] args) {launch();}
-}
+        public static void setWindow (Window window){
+            MainApplication.window = window;
+        }
+
+        public static void main (String[]args){
+            launch();
+        }
+    }

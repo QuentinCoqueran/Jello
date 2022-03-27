@@ -21,11 +21,6 @@ public class MainController {
 
     @FXML
     public void onInitButtonClick(ActionEvent event) throws IOException {
-
     }
-
-    @FXML
-    private Button go_to_incription;
-
 
 }

@@ -15,6 +15,7 @@ public class ConnectionDb {
             String password = "root";
             Class.forName("com.mysql.cj.jdbc.Driver");
             return DriverManager.getConnection(url, user, password);
+
         } catch (ClassNotFoundException | SQLException e) {
             System.out.print("connect ko" + e);
         }
