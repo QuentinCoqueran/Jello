@@ -46,13 +46,13 @@ public class TableModel {
         init();
     }
 
-    private void init() {
+    public void init() {
         scrollPane.getStyleClass().add("edge-to-edge");
         scrollPane.setStyle("-fx-background-color: #FFE4B5;-fx-background: #FFE4B5");
         selectList();
     }
 
-    public void updateCardOfList(String idList, String textIdCard) {
+    private void updateCardOfList(String idList, String textIdCard) {
         Integer idCard = Integer.parseInt(textIdCard);
         String connectQuery = "update card set fk_id_list = '" + idList + "' where id_card = " + idCard + " ;";
         try {
@@ -68,7 +68,7 @@ public class TableModel {
     }
 
     @FXML
-    public void selectList() {
+    private void selectList() {
         grid_new.getChildren().remove(grid_new);
         grid_new = new GridPane();
         ConnectionDb connectNow = new ConnectionDb();
@@ -214,7 +214,7 @@ public class TableModel {
     }
 
     @FXML
-    public void createCard(GridPane finalGridList, int idList) {
+    private void createCard(GridPane finalGridList, int idList) {
         TextField cardTitle = new TextField();
         Button btnSaveTitleCard = new Button();
         Button btnAnnulerTitleCard = new Button();
