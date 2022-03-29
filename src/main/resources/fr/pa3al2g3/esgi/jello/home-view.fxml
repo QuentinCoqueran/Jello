@@ -65,7 +65,7 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <TextField prefHeight="25.0" prefWidth="216.0" promptText="Search" GridPane.columnIndex="1" />
+                        <TextField fx:id="search_bar" prefHeight="25.0" prefWidth="216.0" promptText="Search" GridPane.columnIndex="1" />
                         <ImageView fitHeight="23.0" fitWidth="21.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                            <image>
                               <Image url="@assets/magnifying-glass.png" />

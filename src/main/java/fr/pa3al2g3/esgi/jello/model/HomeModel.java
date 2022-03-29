@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Paint;
@@ -31,7 +32,6 @@ public class HomeModel {
 
     public HomeModel() {
         this.projects = new ArrayList<>();
-        //this.projects.add("test_tas");
     }
 
     public void addProject(String projectName) {
@@ -39,6 +39,25 @@ public class HomeModel {
     }
 
     public void init() {
+        initList();
+
+        TextField search = (TextField) MainApplication.getScene().lookup("#search_bar");
+        search.textProperty().addListener((observable, oldValue, newValue) -> {
+            initList();
+            ArrayList<String> newTab = new ArrayList<>();
+            for(String s : projects){
+                if(s.contains(newValue)){
+                    newTab.add(s);
+                }
+            }
+            this.projects = newTab;
+            initGrid();
+        });
+
+        initGrid();
+    }
+
+    private void initList(){
         projects.clear();
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
@@ -53,7 +72,9 @@ public class HomeModel {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
 
+    private void initGrid(){
         ScrollPane scrollPane = (ScrollPane) MainApplication.getScene().lookup("#project_scroll_pane");
         scrollPane.setStyle("-fx-background-color: #FFE4B5");
         scrollPane.setStyle("-fx-background: #FFE4B5");
@@ -150,8 +171,6 @@ public class HomeModel {
 
         }
         scrollPane.setContent(scrollGrid);
-
-
     }
 
     private double calcWidth(double size) {
