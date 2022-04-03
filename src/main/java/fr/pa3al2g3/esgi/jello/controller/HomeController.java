@@ -3,6 +3,8 @@ package fr.pa3al2g3.esgi.jello.controller;
 import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -29,9 +31,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HomeController {
     private int projectId;
     private HashMap<String, GridPane> hmap;
+    private boolean alertFlag;
 
     @FXML
     public void onCreateButtonClick(ActionEvent event){
+        alertFlag = false;
         projectId = -1;
         Dialog<String> dialog = new Dialog<>();
         dialog.getDialogPane().setPrefWidth(250);
@@ -52,7 +56,9 @@ public class HomeController {
         dialog.getDialogPane().setContent(gridPane);
 
         ButtonType btnOk = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(btnOk, ButtonType.CANCEL);
+        ButtonType btnCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().addAll(btnOk, btnCancel);
 
         projectName.textProperty().addListener((observable, oldValue, newValue) -> {
             if(newValue.matches("^[a-zA-Z][a-zA-Z0-9_-]+$")){
@@ -61,6 +67,7 @@ public class HomeController {
                 dialog.getDialogPane().lookupButton(btnOk).setDisable(true);
             }
         });
+
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == btnOk) {
@@ -105,15 +112,19 @@ public class HomeController {
                     // Header Text: null
                     alert.setHeaderText(null);
                     alert.setContentText("Ce projet existe déjà!");
-
                     alert.showAndWait();
-                    return null;
+                    alertFlag = true;
                 }
             }
             return null;
         });
 
         Optional<String> result = dialog.showAndWait();
+
+        while(alertFlag){ // Tant que le dialog ce ferme à cause de l'alerte, on réouvre le dialog
+            alertFlag = false;
+            result = dialog.showAndWait();
+        }
 
         result.ifPresent(str ->{
             FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("project-view.fxml"));

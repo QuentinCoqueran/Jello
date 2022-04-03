@@ -70,7 +70,7 @@ public class HomeModel {
             }
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            throwables.printStackTrace(); // faire un fichier de log
         }
     }
 
