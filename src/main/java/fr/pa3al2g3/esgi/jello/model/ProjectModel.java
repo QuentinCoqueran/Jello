@@ -37,9 +37,12 @@ public class ProjectModel {
 
     private GridPane gridFavoris;
     private String projetName;
+    private GridPane gridGroups;
+
 
     public ProjectModel() {
         this.gridFavoris = new GridPane();
+        this.gridGroups = new GridPane();
     }
 
     public void init(int projectId){
@@ -133,19 +136,26 @@ public class ProjectModel {
                 gridFavoris.add(favorisButton, count , 0);
                 count += 1;
             }
-        } catch (SQLException throwables) {
+        } catch (SQLException | FileNotFoundException throwables) {
             throwables.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
 
         // CHARGEMENT DES GROUPES // chargement des scrollpanes
-        String selectQueryGroupes = "SELECT `group`.title as groupTitle FROM `group` \n" +
-                                    "WHERE `group`.fk_id_project_trello = 1;";
+        ScrollPane scrollGroups = (ScrollPane) MainApplication.getScene().lookup("#groups");
+        GridPane gridAllGroups = new GridPane();
+        String selectQueryGroupes = "SELECT DISTINCT `group`.title FROM `group` \n" +
+                                    "WHERE `group`.fk_id_project_trello =" + projectId +";";
         try {
             Statement statement = conn.createStatement();
             ResultSet queryOutput = statement.executeQuery(selectQueryGroupes);
+            int countGroup = 0;
             while (queryOutput.next()) {
+                Text groupTitle = new Text(queryOutput.getString("title"));
+                groupTitle.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 24));
+                gridGroups.setPrefHeight(225);
+                ScrollPane scrollGroup = new ScrollPane();
+
+
                 String selectQuerytables = "SELECT `group`.title as groupTitle FROM `group` \n" +
                         "WHERE `group`.fk_id_project_trello = 1;";
                 try {
@@ -153,16 +163,72 @@ public class ProjectModel {
                     ResultSet queryOutput2 = statement.executeQuery(selectQuerytables);
                     int count2 = 0;
                     while (queryOutput.next()) {
+                        InputStream stream = new FileInputStream("src/main/java/fr/pa3al2g3/esgi/jello/asset/favoris.png");
+                        Image favorisimage = new Image(stream);
+                        ImageView favorisImg = new ImageView();
+                        favorisImg.setImage(favorisimage);
+                        favorisImg.setFitHeight(45);
+                        favorisImg.setFitWidth(45);
+                        GridPane.setMargin(favorisImg, new Insets(20,20,0,0));
+                        GridPane.setHalignment(favorisImg, HPos.RIGHT);
+                        GridPane.setValignment(favorisImg, VPos.TOP);
+
+                        // button sur le favoris
+                        Button favorisButton = new Button();
+                        favorisButton.setPrefHeight(45);
+                        favorisButton.setPrefWidth(45);
+                        favorisButton.setOpacity(0);
+                        GridPane.setMargin(favorisButton, new Insets(20,20,0,0));
+                        GridPane.setHalignment(favorisButton, HPos.RIGHT);
+                        GridPane.setValignment(favorisButton, VPos.TOP);
+
+                        Button tabButton = new Button();
+                        tabButton.setPrefWidth(300);
+                        tabButton.setPrefHeight(225);
+                        tabButton.setStyle("-fx-background-color: #ff9161; -fx-background-radius: 25");
+                        tabButton.setText(queryOutput.getString("title"));
+                        tabButton.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 24));
+                        tabButton.setOnAction( new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent event) {
+                                FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("table.fxml"));
+                                Parent root = null;
+                                try {
+                                    root = (Parent) fxmlLoader.load();
+                                    MainApplication.setScene(new Scene(root));
+                                    MainApplication.getStage().setHeight(MainApplication.getScreenBounds().getHeight());
+                                    MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
+                                    MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
+                                    MainApplication.getStage().setMaximized(true);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                MainApplication.getModelManager().getTableModel().init();
+                            }
+                        });
+                        Pane empty = new Pane();
+                        empty.setPrefWidth(50);
+
+                        gridGroups.add(empty, count2, 0);
+                        count2 += 1;
+                        gridGroups.add(tabButton, count2, 0);
+                        gridGroups.add(favorisImg, count2, 0);
+                        gridGroups.add(favorisButton, count2, 0);
+                        count2 += 1;
                     }
+
                 }catch (SQLException throwables){
 
                 }
+                scrollGroup.setPrefHeight(225);
+                scrollGroup.setContent(gridGroups);
+                //gridAllGroups.add();
             }
-        }catch (SQLException throwables){
+        }catch (SQLException | FileNotFoundException throwables){
             throwables.printStackTrace();
         }
-
         scrollFavoris.setPrefHeight(225);
         scrollFavoris.setContent(gridFavoris);
+
     }
 }
