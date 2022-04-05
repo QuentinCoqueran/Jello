@@ -40,7 +40,7 @@ public class ProjectModel {
 
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
-        String selectQuery = "SELECT projectName FROM project_trello WHERE id = " + projectId;
+        String selectQuery = "SELECT projectName FROM project_trello WHERE id_project_trello = " + projectId;
         try {
             Statement statement = conn.createStatement();
             ResultSet queryOutput = statement.executeQuery(selectQuery);
