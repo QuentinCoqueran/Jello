@@ -1,18 +1,22 @@
 package fr.pa3al2g3.esgi.jello.model;
 
+import eu.hansolo.tilesfx.Alarm;
 import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -24,8 +28,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class TableModel {
@@ -34,9 +36,15 @@ public class TableModel {
     private GridPane grid_new = new GridPane();
     private GridPane gridList = new GridPane();
     private GridPane gridCard = new GridPane();
+    private GridPane gridPaneDialogArr = new GridPane();
+    private GridPane gridPaneLabel = new GridPane();
+
+    private TextArea textAreaDialogDescription = new TextArea();
+
 
     private int numberList = 0;
     private int countCard = 0;
+    private int countLabel = 0;
 
     private boolean checkAddList = true;
     private boolean moveCard = false;
@@ -51,7 +59,6 @@ public class TableModel {
     private TextField titleField;
 
     public TableModel() {
-
     }
 
     public void init() {
@@ -76,6 +83,218 @@ public class TableModel {
         selectList();
     }
 
+    public String toRGBCode(Color color) {
+        return String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
+    }
+
+    @FXML
+    public void dialogCard(Label textIdCardText, String textBtn) {
+        GridPane gridCarteDialog = new GridPane();
+        gridPaneDialogArr = new GridPane();
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+        String connectQueryDescription = "select discription from card where id_card = " + Integer.parseInt(textIdCardText.getText());
+
+        try {
+            Statement statement = connectionDB.createStatement();
+            ResultSet queryOutputDesciption = statement.executeQuery(connectQueryDescription);
+            while (queryOutputDesciption.next()) {
+                textAreaDialogDescription.setText(queryOutputDesciption.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        selectLabel(textIdCardText);
+        Text titleCardDialog = new Text(textBtn);
+        titleCardDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 20));
+
+        Text titleCardDescDialog = new Text("Description");
+        titleCardDescDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
+
+        Pane paneTitleCardDescDialog = new Pane();
+        paneTitleCardDescDialog.setPrefHeight(30);
+
+        Pane paneTitleCardDescDialog2 = new Pane();
+        paneTitleCardDescDialog2.setPrefHeight(30);
+        paneTitleCardDescDialog2.setPrefWidth(200);
+
+
+        textAreaDialogDescription.setPrefHeight(100);
+        textAreaDialogDescription.setPrefWidth(300);
+        textAreaDialogDescription.setPromptText("Taper votre description...");
+
+
+        for (int i = 0; i < 8; i++) {
+            Button addDialog = new Button();
+            addDialog.setText("+");
+            addDialog.setStyle("-fx-background-color:transparent;-fx-border-width: 3px;-fx-border-color: black;-fx-border-radius:60;-fx-padding:5px;");
+            addDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
+            addDialog.setPrefWidth(25);
+
+            Pane paneArr = new Pane();
+            paneArr.setPrefHeight(50);
+            paneArr.setPrefWidth(50);
+            Text titleCardDialogMembre = new Text();
+            titleCardDialogMembre.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
+            if (i == 0) {
+                titleCardDialogMembre.setText("Membres");
+            }
+            if (i == 2) {
+                gridPaneDialogArr.add(addDialog, i, 2);
+                titleCardDialogMembre.setText("Labels");
+                addDialog.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        colorPickerLabel(textIdCardText);
+                    }
+                });
+
+            }
+            if (i == 4) {
+                titleCardDialogMembre.setText("Dead Line");
+            }
+            if (i == 6) {
+                titleCardDialogMembre.setText("Importance");
+            }
+            gridPaneDialogArr.add(titleCardDialogMembre, i, 0);
+            if (i != 2) {
+                gridPaneDialogArr.add(addDialog, i, 1);
+            }
+            i += 1;
+            gridPaneDialogArr.add(paneArr, i, 0);
+        }
+
+        Button btnSaveDescriptionDialog = new Button();
+        btnSaveDescriptionDialog.setText("Enregistrer");
+        btnSaveDescriptionDialog.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String textDecription = textAreaDialogDescription.getText();
+                saveDescriptionDialog(textDecription, Integer.parseInt(textIdCardText.getText()));
+            }
+        });
+        Pane rightDialog = new Pane();
+        rightDialog.setPrefWidth(200);
+        rightDialog.setPrefHeight(10);
+
+        Dialog<String> config_dialog = new Dialog<>();
+        config_dialog.getDialogPane().setPrefWidth(1000);
+        config_dialog.getDialogPane().setPrefHeight(500);
+        config_dialog.setTitle("Configuration carte");
+        config_dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+
+        GridPane gridDescription = new GridPane();
+        gridDescription.add(paneTitleCardDescDialog, 0, 0);
+        gridDescription.add(titleCardDescDialog, 0, 1);
+        gridDescription.add(paneTitleCardDescDialog2, 0, 2);
+        gridDescription.add(textAreaDialogDescription, 0, 3);
+        gridDescription.add(btnSaveDescriptionDialog, 0, 4);
+
+        gridCarteDialog.add(titleCardDialog, 0, 0);
+        gridCarteDialog.add(gridDescription, 0, 1);
+        gridCarteDialog.add(rightDialog, 1, 1);
+        gridCarteDialog.add(gridPaneDialogArr, 2, 1);
+
+
+        config_dialog.getDialogPane().setContent(gridCarteDialog);
+        config_dialog.show();
+    }
+
+    @FXML
+    private void selectLabel(Label textIdCardText) {
+        countLabel = 0;
+        gridPaneLabel = new GridPane();
+        String connectQueryDescription = "SELECT * FROM label " +
+                "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label WHERE label_card_union.fk_id_card = " + Integer.parseInt(textIdCardText.getText());
+        try {
+            ConnectionDb connectNow = new ConnectionDb();
+            Connection connectionDB = connectNow.connect();
+            Statement statement = connectionDB.createStatement();
+            ResultSet queryOutputLabbel = statement.executeQuery(connectQueryDescription);
+            while (queryOutputLabbel.next()) {
+                final TextField lab = new TextField(queryOutputLabbel.getString(2));
+                lab.setStyle("-fx-background-color: " + queryOutputLabbel.getString(3) + "; -fx-border-width: 1px;-fx-border-color: white;");
+                lab.setEditable(false);
+                gridPaneLabel.add(lab, 2, countLabel);
+                countLabel += 1;
+            }
+            gridPaneDialogArr.add(gridPaneLabel, 2, 1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void colorPickerLabel(Label textIdCardText) {
+
+        Button btnAnnulerLabelAdd = new Button("Annuler");
+        Button btnSaveLabelAdd = new Button("Enregistrer");
+
+        final ColorPicker colorPicker = new ColorPicker();
+        colorPicker.setValue(Color.RED);
+
+        final TextField lab = new TextField("");
+        lab.setStyle("-fx-background-color: " + toRGBCode(colorPicker.getValue()));
+
+        colorPicker.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                lab.setStyle("-fx-background-color: " + toRGBCode(colorPicker.getValue()));
+            }
+        });
+        btnAnnulerLabelAdd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gridPaneDialogArr.getChildren().remove(colorPicker);
+                gridPaneDialogArr.getChildren().remove(lab);
+                gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
+                gridPaneDialogArr.getChildren().remove(btnSaveLabelAdd);
+            }
+        });
+        btnSaveLabelAdd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String connectQueryFkLabel = "";
+                String connectQuery = "INSERT INTO label (title,color) VALUES (' " + lab.getText() + "', '" + toRGBCode(colorPicker.getValue()) + "') ;";
+                String lastIdInsert = "SELECT LAST_INSERT_ID();";
+                try {
+                    ConnectionDb connectNow = new ConnectionDb();
+                    Connection connectionDB = connectNow.connect();
+                    Statement statement = connectionDB.createStatement();
+                    statement.executeUpdate(connectQuery);
+                    ResultSet queryOutputLastId = statement.executeQuery(lastIdInsert);
+                    while (queryOutputLastId.next()) {
+                        connectQueryFkLabel = "INSERT INTO label_card_union (fk_id_label,fk_id_card) " +
+                                "VALUES ( " + Integer.parseInt(queryOutputLastId.getString(1)) + " , " + Integer.parseInt(textIdCardText.getText()) + ") ;";
+                    }
+                    statement.executeUpdate(connectQueryFkLabel);
+
+                    gridPaneDialogArr.getChildren().remove(colorPicker);
+                    gridPaneDialogArr.getChildren().remove(lab);
+                    gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
+                    gridPaneDialogArr.getChildren().remove(btnSaveLabelAdd);
+                    selectLabel(textIdCardText);
+                    selectList();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        gridPaneDialogArr.add(colorPicker, 2, 3);
+
+        gridPaneDialogArr.add(lab, 2, 4);
+
+        gridPaneDialogArr.add(btnSaveLabelAdd, 2, 5);
+
+        gridPaneDialogArr.add(btnAnnulerLabelAdd, 2, 6);
+
+
+    }
+
     @FXML
     private void selectList() {
         grid_new.getChildren().remove(grid_new);
@@ -89,12 +308,17 @@ public class TableModel {
                 "UNION\n" +
                 "select list_trello.title,id_list,'','' from list_trello\n" +
                 "where fk_id_table = 1 order by id_list;";
+
+        String connectQueryLabelColor = "SELECT color ,label_card_union.fk_id_card FROM label \n" +
+                "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label;";
         try {
             Statement statement = connectionDB.createStatement();
+            Statement statement2 = connectionDB.createStatement();
             ResultSet queryOutput = statement.executeQuery(connectQuery);
             while (queryOutput.next()) {
+                ResultSet queryOutputLabelColor = statement2.executeQuery(connectQueryLabelColor);
                 Text titleList = new Text(queryOutput.getString(1));
-                titleList.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 15));
+                titleList.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
                 int idList = queryOutput.getInt(2);
                 Button btnCard = new Button();
                 btnCard.setPrefWidth(200);
@@ -102,6 +326,7 @@ public class TableModel {
 
 
                 btnCard.setText(queryOutput.getString(3));
+
                 InputStream stream = new FileInputStream("src/main/java/fr/pa3al2g3/esgi/jello/asset/share.png");
 
                 Image image = new Image(stream);
@@ -167,9 +392,8 @@ public class TableModel {
                 Button addCard = new Button();
                 addCard.setText("+");
                 addCard.setStyle("-fx-background-color:transparent;-fx-border-width: 3px;-fx-border-color: black;-fx-border-radius:60;-fx-padding:5px;");
-                addCard.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 17));
+                addCard.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 17));
                 addCard.setPrefWidth(37);
-
 
                 Button btnMoveCardInThisList = new Button();
                 btnMoveCardInThisList.setPrefWidth(200);
@@ -179,6 +403,13 @@ public class TableModel {
                     @Override
                     public void handle(MouseEvent event) {
                         updateCardOfList(textIdList.getText(), btnSelectedId);
+                    }
+                });
+                textAreaDialogDescription = new TextArea();
+                btnCard.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        dialogCard(textIdCard, btnCard.getText());
                     }
                 });
                 if (textIdList.getText().equals(btnSelectedIdList)) {
@@ -193,7 +424,24 @@ public class TableModel {
                 GridPane.setHalignment(addCard, HPos.CENTER);
 
                 if (!Objects.equals(btnCard.getText(), "")) {
+                    int countLabelColor = 0;
                     gridCard.add(panebot, 0, countCard);
+                    countCard += 1;
+                    GridPane gridLabelColorCircle = new GridPane();
+                    while (queryOutputLabelColor.next()) {
+                        int idCardLabelColor = queryOutputLabelColor.getInt(2);
+                        if (Integer.parseInt(textIdCard.getText()) == idCardLabelColor) {
+                            final Circle circle = new Circle(10);
+                            circle.setFill(Paint.valueOf(queryOutputLabelColor.getString(1)));
+                            if (countLabelColor <= 7) {
+                                gridLabelColorCircle.add(circle,countLabelColor,0);
+                            } else {
+                                break;
+                            }
+                            countLabelColor += 1;
+                        }
+                    }
+                    gridCard.add(gridLabelColorCircle, 0, countCard);
                     countCard += 1;
                     gridCard.add(btnCard, 0, countCard);
                     gridCard.add(gridImageMoveCard, 1, countCard);
@@ -251,7 +499,20 @@ public class TableModel {
                 countCard += 1;
                 scrollPane.setContent(grid_new);
             }
+
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveDescriptionDialog(String textDecription, int idCard) {
+        String connectQueryUpdateDescription = "update card set discription = '" + textDecription + "' where id_card = " + idCard;
+        try {
+            ConnectionDb connectNow = new ConnectionDb();
+            Connection connectionDB = connectNow.connect();
+            Statement statement = connectionDB.createStatement();
+            statement.executeUpdate(connectQueryUpdateDescription);
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -278,8 +539,8 @@ public class TableModel {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        checkAddCard = false;
                     }
+                    checkAddCard = false;
                     finalGridList.getChildren().remove(gridSaveCard);
                     finalGridList.setPrefWidth(200);
                     selectList();

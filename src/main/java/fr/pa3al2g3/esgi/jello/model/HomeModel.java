@@ -70,7 +70,7 @@ public class HomeModel {
             }
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            throwables.printStackTrace(); // faire un fichier de log
         }
     }
 
@@ -109,13 +109,13 @@ public class HomeModel {
 
                     ConnectionDb connectNow = new ConnectionDb();
                     Connection conn = connectNow.connect();
-                    String selectQuery = "SELECT id FROM project_trello WHERE projectName = '" + btn.getText() + "'";
+                    String selectQuery = "SELECT id_project_trello FROM project_trello WHERE projectName = '" + btn.getText() + "'";
                     int projectId = -1;
                     try {
                         Statement statement = conn.createStatement();
                         ResultSet queryOutput = statement.executeQuery(selectQuery);
                         while (queryOutput.next()) {
-                            projectId = queryOutput.getInt("id");
+                            projectId = queryOutput.getInt("id_project_trello");
                         }
 
                     } catch (SQLException throwables) {

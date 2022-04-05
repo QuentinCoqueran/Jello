@@ -53,7 +53,7 @@ public class ProjectModel {
 
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
-        // TITRE PROJET
+
         String selectQueryProject = "SELECT projectName FROM project_trello WHERE id_project_trello = " + projectId;
         try {
             Statement statement = conn.createStatement();
