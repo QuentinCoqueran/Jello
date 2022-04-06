@@ -12,10 +12,6 @@ import javafx.scene.Scene;
 import java.io.IOException;
 
 public class ProjectController {
-
-
-
-
     @FXML
     public void onClickReturn(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("home-view.fxml"));
