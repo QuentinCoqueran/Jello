@@ -306,7 +306,7 @@ public class TableModel {
                 "inner join card on card.fk_id_list =list_trello.id_list\n" +
                 "where fk_id_table = 1\n" +
                 "UNION\n" +
-                "select list_trello.title,id_list,'','' from list_trello\n" +
+                "select list_trello.title,id_list,'',( 0 || '')::int from list_trello\n" +
                 "where fk_id_table = 1 order by id_list;";
 
         String connectQueryLabelColor = "SELECT color ,label_card_union.fk_id_card FROM label \n" +
@@ -316,6 +316,7 @@ public class TableModel {
             Statement statement2 = connectionDB.createStatement();
             ResultSet queryOutput = statement.executeQuery(connectQuery);
             while (queryOutput.next()) {
+
                 ResultSet queryOutputLabelColor = statement2.executeQuery(connectQueryLabelColor);
                 Text titleList = new Text(queryOutput.getString(1));
                 titleList.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
@@ -412,7 +413,7 @@ public class TableModel {
                         dialogCard(textIdCard, btnCard.getText());
                     }
                 });
-                if (textIdList.getText().equals(btnSelectedIdList)) {
+                if (textIdList.getText() != null && textIdList.getText().equals(btnSelectedIdList)) {
                     btnMoveCardInThisList.setVisible(false);
                 }
 
@@ -430,11 +431,11 @@ public class TableModel {
                     GridPane gridLabelColorCircle = new GridPane();
                     while (queryOutputLabelColor.next()) {
                         int idCardLabelColor = queryOutputLabelColor.getInt(2);
-                        if (Integer.parseInt(textIdCard.getText()) == idCardLabelColor) {
+                        if (textIdCard.getText() != null && Integer.parseInt(textIdCard.getText()) == idCardLabelColor) {
                             final Circle circle = new Circle(10);
                             circle.setFill(Paint.valueOf(queryOutputLabelColor.getString(1)));
                             if (countLabelColor <= 7) {
-                                gridLabelColorCircle.add(circle,countLabelColor,0);
+                                gridLabelColorCircle.add(circle, countLabelColor, 0);
                             } else {
                                 break;
                             }
