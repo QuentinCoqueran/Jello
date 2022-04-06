@@ -29,8 +29,10 @@ import java.util.ArrayList;
 
 public class HomeModel {
     private ArrayList<String> projects;
+    private ArrayList<String> allProjects;
 
     public HomeModel() {
+        this.allProjects = new ArrayList<>();
         this.projects = new ArrayList<>();
     }
 
@@ -43,7 +45,7 @@ public class HomeModel {
 
         TextField search = (TextField) MainApplication.getScene().lookup("#search_bar");
         search.textProperty().addListener((observable, oldValue, newValue) -> {
-            initList();
+            projects = allProjects;
             ArrayList<String> newTab = new ArrayList<>();
             for(String s : projects){
                 if(s.contains(newValue)){
@@ -58,6 +60,7 @@ public class HomeModel {
     }
 
     private void initList(){
+        allProjects.clear();
         projects.clear();
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
@@ -66,6 +69,7 @@ public class HomeModel {
             Statement statement = conn.createStatement();
             ResultSet queryOutput = statement.executeQuery(selectQuery);
             while (queryOutput.next()) {
+                this.allProjects.add(queryOutput.getString("projectName"));
                 this.projects.add(queryOutput.getString("projectName"));
             }
 
