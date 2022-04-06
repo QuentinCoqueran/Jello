@@ -23,11 +23,11 @@ public class ConnectionDb {
         }*/
 
         try {
-            URI dbUri = new URI("postgres://jkavgnriemveuq:46a94ca9420d54a24cc3327daa364566a98c84daf904e85bb0ee55fb1d7c7253@ec2-52-30-67-143.eu-west-1.compute.amazonaws.com:5432/dfeaibbjcf1tqi");
+            URI dbUri = new URI("mysql://b8c3bb6a076ba6:80789dda@eu-cdbr-west-02.cleardb.net/heroku_6c9a472678d54e1");
 
             String username = dbUri.getUserInfo().split(":")[0];
             String password = dbUri.getUserInfo().split(":")[1];
-            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() + "?sslmode=require";
+            String dbUrl = "jdbc:mysql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() + "?sslmode=require";
 
             return DriverManager.getConnection(dbUrl, username, password);
         } catch (SQLException | URISyntaxException e){
