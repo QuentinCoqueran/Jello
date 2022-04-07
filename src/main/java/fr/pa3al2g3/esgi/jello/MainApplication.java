@@ -25,14 +25,14 @@ public class MainApplication extends Application {
         MainApplication.instance = getClass();
         MainApplication.stage = stage;
         MainApplication.modelManager = new ModelManager();
-        Parent root = FXMLLoader.load(getClass().getResource("connection-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("table.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
         //stage.setMaximized(true);
         MainApplication.screenBounds = Screen.getPrimary().getBounds();
         stage.show();
         MainApplication.window = stage.getScene().getWindow();
-
+        MainApplication.getModelManager().getTableModel().init();
     }
 
     public static void setScene(Scene scene) {
