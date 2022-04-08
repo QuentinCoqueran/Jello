@@ -42,7 +42,7 @@ public class ProjectModel {
 
     public ProjectModel() {
         this.gridFavoris = new GridPane();
-        this.gridGroups = new GridPane();
+
     }
 
     public void init(int projectId){
@@ -58,7 +58,7 @@ public class ProjectModel {
 
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
-        ScrollPane scrollGroups = (ScrollPane) MainApplication.getScene().lookup("#groups");
+        ScrollPane scrollGroupV = (ScrollPane) MainApplication.getScene().lookup("#groups");
         GridPane gridAllGroups = new GridPane();
         String selectQueryGroupes = "SELECT DISTINCT `group`.title, id_group FROM `group` \n" +
                 "WHERE `group`.fk_id_project_trello =" + projectId +";";
@@ -67,26 +67,37 @@ public class ProjectModel {
             ResultSet queryOutput = statement.executeQuery(selectQueryGroupes);
             int countGroup = 0;
             while (queryOutput.next()) {
+                GridPane gridButton = new GridPane();
+                this.gridGroups = new GridPane();
                 Text groupTitle = new Text(queryOutput.getString("title"));
                 int groupid = queryOutput.getInt("id_group");
                 groupTitle.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 24));
                 gridGroups.setPrefHeight(225);
-                ScrollPane scrollGroup = new ScrollPane();
+                ScrollPane scrollGroupH = new ScrollPane();
 
-                setTables(groupid, scrollGroup);
+                GridPane gridText = new GridPane();
+                gridText.add(groupTitle, 0, 0);
+                //ajouter membre dans gridText
 
-                scrollGroup.setPrefHeight(225);
-                scrollGroup.setContent(gridGroups);
-                gridAllGroups.add(scrollGroup, 0, countGroup);
+                gridButton.add(gridText, 0, 0);
+
+                setTables(groupid, gridButton);
+
+
+                //scrollGroupH.setPrefHeight(225);
+                scrollGroupH.setContent(gridButton);
+                scrollGroupH.setStyle("-fx-background-color: yellow");
+                gridAllGroups.add(scrollGroupH, 0, countGroup); // test
 
                 countGroup += 1;
             }
         }catch (SQLException throwables){
             throwables.printStackTrace();
         }
+        scrollGroupV.setContent(gridAllGroups);
     }
 
-    private void setTables(int groupid, ScrollPane scrollGroup) {
+    private void setTables(int groupid, GridPane gridButton) {
 
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
@@ -97,6 +108,10 @@ public class ProjectModel {
             ResultSet queryOutput2 = statement2.executeQuery(selectQuerytables);
             int count2 = 0;
             while (queryOutput2.next()) {
+
+
+
+
                 InputStream stream = new FileInputStream("src/main/java/fr/pa3al2g3/esgi/jello/asset/favoris.png");
                 Image favorisimage = new Image(stream);
                 ImageView favorisImg = new ImageView();
@@ -144,17 +159,20 @@ public class ProjectModel {
                 empty.setPrefWidth(50);
 
 
-                gridGroups.add(empty, count2, 0);
+                gridGroups.add(empty, count2, 1);
                 count2 += 1;
-                gridGroups.add(tabButton, count2, 0);
-                gridGroups.add(favorisImg, count2, 0);
-                gridGroups.add(favorisButton, count2, 0);
+                gridGroups.add(tabButton, count2, 1);
+                gridGroups.add(favorisImg, count2, 1);
+                gridGroups.add(favorisButton, count2, 1);
                 count2 += 1;
             }
+
+            gridButton.add(gridGroups, 0, 1);
 
         }catch (SQLException | FileNotFoundException throwables){
             throwables.printStackTrace();
         }
+
     }
 
 
