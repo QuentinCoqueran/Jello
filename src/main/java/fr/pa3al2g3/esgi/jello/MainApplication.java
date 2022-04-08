@@ -25,14 +25,14 @@ public class MainApplication extends Application {
         MainApplication.instance = getClass();
         MainApplication.stage = stage;
         MainApplication.modelManager = new ModelManager();
-        Parent root = FXMLLoader.load(getClass().getResource("project-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("table.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMaximized(true);
+        //stage.setMaximized(true);
         MainApplication.screenBounds = Screen.getPrimary().getBounds();
         stage.show();
         MainApplication.window = stage.getScene().getWindow();
-        MainApplication.getModelManager().getProjectModel().init(1);
+        MainApplication.getModelManager().getTableModel().init();
     }
 
     public static void setScene(Scene scene) {
@@ -55,21 +55,21 @@ public class MainApplication extends Application {
     public static ModelManager getModelManager() {
         return modelManager;
 
-        }
-
-        public static Stage getStage () {
-            return stage;
-        }
-
-        public static Rectangle2D getScreenBounds () {
-            return screenBounds;
-        }
-
-        public static void setWindow (Window window){
-            MainApplication.window = window;
-        }
-
-        public static void main (String[]args){
-            launch();
-        }
     }
+
+    public static Stage getStage () {
+        return stage;
+    }
+
+    public static Rectangle2D getScreenBounds () {
+        return screenBounds;
+    }
+
+    public static void setWindow (Window window){
+        MainApplication.window = window;
+    }
+
+    public static void main (String[]args){
+        launch();
+    }
+}
