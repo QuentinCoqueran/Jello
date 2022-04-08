@@ -143,6 +143,7 @@ public class ProjectModel {
                 Pane empty = new Pane();
                 empty.setPrefWidth(50);
 
+
                 gridGroups.add(empty, count2, 0);
                 count2 += 1;
                 gridGroups.add(tabButton, count2, 0);
