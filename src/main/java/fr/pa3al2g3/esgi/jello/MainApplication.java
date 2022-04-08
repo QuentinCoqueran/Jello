@@ -1,5 +1,6 @@
 package fr.pa3al2g3.esgi.jello;
 
+import fr.pa3al2g3.esgi.jello.manager.DatabaseManager;
 import fr.pa3al2g3.esgi.jello.manager.ModelManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +12,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class MainApplication extends Application {
     private static Stage stage;
@@ -19,9 +23,11 @@ public class MainApplication extends Application {
     private static Window window;
     private static Class instance;
     private static ModelManager modelManager;
+    private static Connection dbConnection;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, URISyntaxException, SQLException {
+        MainApplication.dbConnection = new DatabaseManager().getDb();
         MainApplication.instance = getClass();
         MainApplication.stage = stage;
         MainApplication.modelManager = new ModelManager();
@@ -33,6 +39,10 @@ public class MainApplication extends Application {
         stage.show();
         MainApplication.window = stage.getScene().getWindow();
 
+    }
+
+    public static Connection getDatabase(){
+        return dbConnection;
     }
 
     public static void setScene(Scene scene) {
