@@ -8,6 +8,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -28,6 +29,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Objects;
 
 public class TableModel {
@@ -38,6 +42,7 @@ public class TableModel {
     private GridPane gridCard = new GridPane();
     private GridPane gridPaneDialogArr = new GridPane();
     private GridPane gridPaneLabel = new GridPane();
+    private GridPane gridPaneDateLine = new GridPane();
 
     private TextArea textAreaDialogDescription = new TextArea();
 
@@ -90,8 +95,78 @@ public class TableModel {
                 (int) (color.getBlue() * 255));
     }
 
-    public void deadLine() {
-        System.out.println("coco");
+    @FXML
+    public void selectDeadLine(Label textIdCardText) {
+        gridPaneDateLine = new GridPane();
+        String connectQueryDescription = "SELECT end_date FROM card  WHERE id_card = " + Integer.parseInt(textIdCardText.getText());
+        try {
+            ConnectionDb connectNow = new ConnectionDb();
+            Connection connectionDB = connectNow.connect();
+            Statement statement = connectionDB.createStatement();
+            ResultSet queryOutputLabbel = statement.executeQuery(connectQueryDescription);
+            while (queryOutputLabbel.next()) {
+                final TextField lab = new TextField(queryOutputLabbel.getString(1));
+                lab.setEditable(false);
+                if (!Objects.equals(lab.getText(), null)) {
+                    gridPaneDateLine.add(lab, 0, 0);
+                    gridPaneDialogArr.add(gridPaneDateLine, 4, 1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
+    @FXML
+    public void deadLine(Label textIdCard) {
+        Button btnAnnulerDate = new Button("Annuler");
+        Button btnSaveDateAdd = new Button("Enregistrer");
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(convertToLocalDateViaInstant(new Date()));
+
+
+        btnAnnulerDate.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gridPaneDialogArr.getChildren().remove(datePicker);
+                gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
+                gridPaneDialogArr.getChildren().remove(btnSaveDateAdd);
+            }
+        });
+        btnSaveDateAdd.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                String connectQuery = "UPDATE card  SET end_date = '" + datePicker.getValue() + "' WHERE id_card = " + Integer.parseInt(textIdCard.getText()) + ";";
+                try {
+                    ConnectionDb connectNow = new ConnectionDb();
+                    Connection connectionDB = connectNow.connect();
+                    Statement statement = connectionDB.createStatement();
+                    statement.executeUpdate(connectQuery);
+
+                    gridPaneDialogArr.getChildren().remove(datePicker);
+                    gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
+                    gridPaneDialogArr.getChildren().remove(btnSaveDateAdd);
+                    selectDeadLine(textIdCard);
+                    selectList();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        gridPaneDialogArr.add(datePicker, 4, 3);
+
+        gridPaneDialogArr.add(btnSaveDateAdd, 4, 4);
+
+        gridPaneDialogArr.add(btnAnnulerDate, 4, 5);
+
     }
 
     @FXML
@@ -112,6 +187,7 @@ public class TableModel {
             e.printStackTrace();
         }
         selectLabel(textIdCardText);
+        selectDeadLine(textIdCardText);
         Text titleCardDialog = new Text(textBtn);
         titleCardDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 20));
 
@@ -157,11 +233,12 @@ public class TableModel {
                 });
             }
             if (i == 4) {
+                gridPaneDialogArr.add(addDialog, i, 2);
                 titleCardDialogMembre.setText("Dead Line");
                 addDialog.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        deadLine();
+                        deadLine(textIdCardText);
                     }
                 });
             }
@@ -169,7 +246,7 @@ public class TableModel {
                 titleCardDialogMembre.setText("Importance");
             }
             gridPaneDialogArr.add(titleCardDialogMembre, i, 0);
-            if (i != 2) {
+            if (i != 2 && i != 4) {
                 gridPaneDialogArr.add(addDialog, i, 1);
             }
             i += 1;
@@ -321,7 +398,7 @@ public class TableModel {
         String connectQueryIdList = "Select distinct id_list,title from list_trello;";
 
 
-        String connectQueryLabelColor = "SELECT color ,label_card_union.fk_id_card FROM label \n" +
+        String connectQueryLabelColor = "SELECT color ,label_card_union.fk_id_card FROM label " +
                 "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label;";
         try {
             Statement statement = connectionDB.createStatement();
@@ -331,7 +408,7 @@ public class TableModel {
             while (queryOutput.next()) {
                 //LIST
                 int idList = queryOutput.getInt(1);
-                String connectQueryCard = "Select id_card, title from card where fk_id_list = " + idList;
+                String connectQueryCard = "Select id_card, title , end_date from card where fk_id_list = " + idList;
                 ResultSet queryOutputCard = statement1.executeQuery(connectQueryCard);
                 Text titleList = new Text(queryOutput.getString(2));
                 titleList.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
@@ -432,6 +509,12 @@ public class TableModel {
                     btnCard.setPrefWidth(200);
                     btnCard.setPrefHeight(50);
 
+                    TextField dateLine = new TextField(queryOutputCard.getString(3));
+                    dateLine.setPrefWidth(200);
+                    dateLine.setPrefHeight(15);
+                    dateLine.setStyle("-fx-background-color: white");
+
+
                     btnCard.setText(queryOutputCard.getString(2));
                     InputStream stream = new FileInputStream("src/main/java/fr/pa3al2g3/esgi/jello/asset/share.png");
 
@@ -453,7 +536,7 @@ public class TableModel {
                         btnCard.setStyle("-fx-border-width: 2px;-fx-border-color: red;");
                     } else {
                         btnCard.setStyle("-fx-border-width: 0px;-fx-border-color: transparent;");
-                        btnCard.setStyle("-fx-background-color: white;-fx-background-radius:10");
+                        btnCard.setStyle("-fx-background-color: white;");
                     }
 
                     Pane panebot = new Pane();
@@ -489,8 +572,14 @@ public class TableModel {
                         }
                         gridCard.add(gridLabelColorCircle, 0, countCard);
                         countCard += 1;
-                        gridCard.add(btnCard, 0, countCard);
                         gridCard.add(gridImageMoveCard, 1, countCard);
+                        gridCard.add(btnCard, 0, countCard);
+                        if (dateLine.getText() != null) {
+                            countCard += 1;
+                            gridCard.add(dateLine, 0, countCard);
+                            dateLine.setAlignment(Pos.CENTER);
+                        }
+
                         gridImageMoveCard.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 
                             @Override
