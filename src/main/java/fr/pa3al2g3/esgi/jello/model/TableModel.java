@@ -90,6 +90,10 @@ public class TableModel {
                 (int) (color.getBlue() * 255));
     }
 
+    public void deadLine() {
+        System.out.println("coco");
+    }
+
     @FXML
     public void dialogCard(Label textIdCardText, String textBtn) {
         GridPane gridCarteDialog = new GridPane();
@@ -151,10 +155,15 @@ public class TableModel {
                         colorPickerLabel(textIdCardText);
                     }
                 });
-
             }
             if (i == 4) {
                 titleCardDialogMembre.setText("Dead Line");
+                addDialog.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        deadLine();
+                    }
+                });
             }
             if (i == 6) {
                 titleCardDialogMembre.setText("Importance");
