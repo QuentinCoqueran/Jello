@@ -1,20 +1,24 @@
 package fr.pa3al2g3.esgi.jello.model;
 
-import eu.hansolo.tilesfx.Alarm;
-import fr.pa3al2g3.esgi.jello.ConnectionDb;
+
 import fr.pa3al2g3.esgi.jello.MainApplication;
+import fr.pa3al2g3.esgi.jello.enumerator.Importance;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.value.ChangeListener;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -22,19 +26,22 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Window;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
+
 
 public class TableModel {
+
+    private VBox root = new VBox();
 
     private ScrollPane scrollPane;
     private GridPane grid_new = new GridPane();
@@ -44,12 +51,14 @@ public class TableModel {
     private GridPane gridPaneLabel = new GridPane();
     private GridPane gridPaneDateLine = new GridPane();
 
+
     private TextArea textAreaDialogDescription = new TextArea();
 
 
     private int numberList = 0;
     private int countCard = 0;
     private int countLabel = 0;
+
 
     private boolean checkAddList = true;
     private boolean moveCard = false;
@@ -59,12 +68,9 @@ public class TableModel {
     private String btnSelectedId = "";
     private String btnSelectedIdList = "";
 
-
     @FXML
     private TextField titleField;
-
-    public TableModel() {
-    }
+    private ChangeListener<Boolean> listener;
 
     public void init() {
         scrollPane = (ScrollPane) MainApplication.getScene().lookup("#main_scrollbar");
@@ -73,320 +79,12 @@ public class TableModel {
         selectList();
     }
 
-    private void updateCardOfList(String idList, String textIdCard) {
-        Integer idCard = Integer.parseInt(textIdCard);
-        String connectQuery = "update card set fk_id_list = '" + idList + "' where id_card = " + idCard + " ;";
-        try {
-            ConnectionDb connectNow = new ConnectionDb();
-            Connection connectionDB = connectNow.connect();
-            Statement statement = connectionDB.createStatement();
-            statement.executeUpdate(connectQuery);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        moveCard = false;
-        selectList();
-    }
-
-    public String toRGBCode(Color color) {
-        return String.format("#%02X%02X%02X",
-                (int) (color.getRed() * 255),
-                (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255));
-    }
-
-    @FXML
-    public void selectDeadLine(Label textIdCardText) {
-        gridPaneDateLine = new GridPane();
-        String connectQueryDescription = "SELECT end_date FROM card  WHERE id_card = " + Integer.parseInt(textIdCardText.getText());
-        try {
-            ConnectionDb connectNow = new ConnectionDb();
-            Connection connectionDB = connectNow.connect();
-            Statement statement = connectionDB.createStatement();
-            ResultSet queryOutputLabbel = statement.executeQuery(connectQueryDescription);
-            while (queryOutputLabbel.next()) {
-                final TextField lab = new TextField(queryOutputLabbel.getString(1));
-                lab.setEditable(false);
-                if (!Objects.equals(lab.getText(), null)) {
-                    gridPaneDateLine.add(lab, 0, 0);
-                    gridPaneDialogArr.add(gridPaneDateLine, 4, 1);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-        return dateToConvert.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-    }
-
-    @FXML
-    public void deadLine(Label textIdCard) {
-        Button btnAnnulerDate = new Button("Annuler");
-        Button btnSaveDateAdd = new Button("Enregistrer");
-        DatePicker datePicker = new DatePicker();
-        datePicker.setValue(convertToLocalDateViaInstant(new Date()));
-
-
-        btnAnnulerDate.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                gridPaneDialogArr.getChildren().remove(datePicker);
-                gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
-                gridPaneDialogArr.getChildren().remove(btnSaveDateAdd);
-            }
-        });
-        btnSaveDateAdd.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                String connectQuery = "UPDATE card  SET end_date = '" + datePicker.getValue() + "' WHERE id_card = " + Integer.parseInt(textIdCard.getText()) + ";";
-                try {
-                    ConnectionDb connectNow = new ConnectionDb();
-                    Connection connectionDB = connectNow.connect();
-                    Statement statement = connectionDB.createStatement();
-                    statement.executeUpdate(connectQuery);
-
-                    gridPaneDialogArr.getChildren().remove(datePicker);
-                    gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
-                    gridPaneDialogArr.getChildren().remove(btnSaveDateAdd);
-                    selectDeadLine(textIdCard);
-                    selectList();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        gridPaneDialogArr.add(datePicker, 4, 3);
-
-        gridPaneDialogArr.add(btnSaveDateAdd, 4, 4);
-
-        gridPaneDialogArr.add(btnAnnulerDate, 4, 5);
-
-    }
-
-    @FXML
-    public void dialogCard(Label textIdCardText, String textBtn) {
-        GridPane gridCarteDialog = new GridPane();
-        gridPaneDialogArr = new GridPane();
-        ConnectionDb connectNow = new ConnectionDb();
-        Connection connectionDB = connectNow.connect();
-        String connectQueryDescription = "select discription from card where id_card = " + Integer.parseInt(textIdCardText.getText());
-
-        try {
-            Statement statement = connectionDB.createStatement();
-            ResultSet queryOutputDesciption = statement.executeQuery(connectQueryDescription);
-            while (queryOutputDesciption.next()) {
-                textAreaDialogDescription.setText(queryOutputDesciption.getString(1));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        selectLabel(textIdCardText);
-        selectDeadLine(textIdCardText);
-        Text titleCardDialog = new Text(textBtn);
-        titleCardDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 20));
-
-        Text titleCardDescDialog = new Text("Description");
-        titleCardDescDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
-
-        Pane paneTitleCardDescDialog = new Pane();
-        paneTitleCardDescDialog.setPrefHeight(30);
-
-        Pane paneTitleCardDescDialog2 = new Pane();
-        paneTitleCardDescDialog2.setPrefHeight(30);
-        paneTitleCardDescDialog2.setPrefWidth(200);
-
-
-        textAreaDialogDescription.setPrefHeight(100);
-        textAreaDialogDescription.setPrefWidth(300);
-        textAreaDialogDescription.setPromptText("Taper votre description...");
-
-
-        for (int i = 0; i < 8; i++) {
-            Button addDialog = new Button();
-            addDialog.setText("+");
-            addDialog.setStyle("-fx-background-color:transparent;-fx-border-width: 3px;-fx-border-color: black;-fx-border-radius:60;-fx-padding:5px;");
-            addDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
-            addDialog.setPrefWidth(25);
-
-            Pane paneArr = new Pane();
-            paneArr.setPrefHeight(50);
-            paneArr.setPrefWidth(50);
-            Text titleCardDialogMembre = new Text();
-            titleCardDialogMembre.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
-            if (i == 0) {
-                titleCardDialogMembre.setText("Membres");
-            }
-            if (i == 2) {
-                gridPaneDialogArr.add(addDialog, i, 2);
-                titleCardDialogMembre.setText("Labels");
-                addDialog.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        colorPickerLabel(textIdCardText);
-                    }
-                });
-            }
-            if (i == 4) {
-                gridPaneDialogArr.add(addDialog, i, 2);
-                titleCardDialogMembre.setText("Dead Line");
-                addDialog.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        deadLine(textIdCardText);
-                    }
-                });
-            }
-            if (i == 6) {
-                titleCardDialogMembre.setText("Importance");
-            }
-            gridPaneDialogArr.add(titleCardDialogMembre, i, 0);
-            if (i != 2 && i != 4) {
-                gridPaneDialogArr.add(addDialog, i, 1);
-            }
-            i += 1;
-            gridPaneDialogArr.add(paneArr, i, 0);
-        }
-
-        Button btnSaveDescriptionDialog = new Button();
-        btnSaveDescriptionDialog.setText("Enregistrer");
-        btnSaveDescriptionDialog.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String textDecription = textAreaDialogDescription.getText();
-                saveDescriptionDialog(textDecription, Integer.parseInt(textIdCardText.getText()));
-            }
-        });
-        Pane rightDialog = new Pane();
-        rightDialog.setPrefWidth(200);
-        rightDialog.setPrefHeight(10);
-
-        Dialog<String> config_dialog = new Dialog<>();
-        config_dialog.getDialogPane().setPrefWidth(1000);
-        config_dialog.getDialogPane().setPrefHeight(500);
-        config_dialog.setTitle("Configuration carte");
-        config_dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
-
-        GridPane gridDescription = new GridPane();
-        gridDescription.add(paneTitleCardDescDialog, 0, 0);
-        gridDescription.add(titleCardDescDialog, 0, 1);
-        gridDescription.add(paneTitleCardDescDialog2, 0, 2);
-        gridDescription.add(textAreaDialogDescription, 0, 3);
-        gridDescription.add(btnSaveDescriptionDialog, 0, 4);
-
-        gridCarteDialog.add(titleCardDialog, 0, 0);
-        gridCarteDialog.add(gridDescription, 0, 1);
-        gridCarteDialog.add(rightDialog, 1, 1);
-        gridCarteDialog.add(gridPaneDialogArr, 2, 1);
-
-
-        config_dialog.getDialogPane().setContent(gridCarteDialog);
-        config_dialog.show();
-    }
-
-    @FXML
-    private void selectLabel(Label textIdCardText) {
-        countLabel = 0;
-        gridPaneLabel = new GridPane();
-        String connectQueryDescription = "SELECT * FROM label " +
-                "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label WHERE label_card_union.fk_id_card = " + Integer.parseInt(textIdCardText.getText());
-        try {
-            ConnectionDb connectNow = new ConnectionDb();
-            Connection connectionDB = connectNow.connect();
-            Statement statement = connectionDB.createStatement();
-            ResultSet queryOutputLabbel = statement.executeQuery(connectQueryDescription);
-            while (queryOutputLabbel.next()) {
-                final TextField lab = new TextField(queryOutputLabbel.getString(2));
-                lab.setStyle("-fx-background-color: " + queryOutputLabbel.getString(3) + "; -fx-border-width: 1px;-fx-border-color: white;");
-                lab.setEditable(false);
-                gridPaneLabel.add(lab, 2, countLabel);
-                countLabel += 1;
-            }
-            gridPaneDialogArr.add(gridPaneLabel, 2, 1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void colorPickerLabel(Label textIdCardText) {
-
-        Button btnAnnulerLabelAdd = new Button("Annuler");
-        Button btnSaveLabelAdd = new Button("Enregistrer");
-
-        final ColorPicker colorPicker = new ColorPicker();
-        colorPicker.setValue(Color.RED);
-
-        final TextField lab = new TextField("");
-        lab.setStyle("-fx-background-color: " + toRGBCode(colorPicker.getValue()));
-
-        colorPicker.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                lab.setStyle("-fx-background-color: " + toRGBCode(colorPicker.getValue()));
-            }
-        });
-        btnAnnulerLabelAdd.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                gridPaneDialogArr.getChildren().remove(colorPicker);
-                gridPaneDialogArr.getChildren().remove(lab);
-                gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
-                gridPaneDialogArr.getChildren().remove(btnSaveLabelAdd);
-            }
-        });
-        btnSaveLabelAdd.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String connectQueryFkLabel = "";
-                String connectQuery = "INSERT INTO label (title,color) VALUES (' " + lab.getText() + "', '" + toRGBCode(colorPicker.getValue()) + "') ;";
-                String lastIdInsert = "SELECT LAST_INSERT_ID();";
-                try {
-                    ConnectionDb connectNow = new ConnectionDb();
-                    Connection connectionDB = connectNow.connect();
-                    Statement statement = connectionDB.createStatement();
-                    statement.executeUpdate(connectQuery);
-                    ResultSet queryOutputLastId = statement.executeQuery(lastIdInsert);
-                    while (queryOutputLastId.next()) {
-                        connectQueryFkLabel = "INSERT INTO label_card_union (fk_id_label,fk_id_card) " +
-                                "VALUES ( " + Integer.parseInt(queryOutputLastId.getString(1)) + " , " + Integer.parseInt(textIdCardText.getText()) + ") ;";
-                    }
-                    statement.executeUpdate(connectQueryFkLabel);
-
-                    gridPaneDialogArr.getChildren().remove(colorPicker);
-                    gridPaneDialogArr.getChildren().remove(lab);
-                    gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
-                    gridPaneDialogArr.getChildren().remove(btnSaveLabelAdd);
-                    selectLabel(textIdCardText);
-                    selectList();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        gridPaneDialogArr.add(colorPicker, 2, 3);
-
-        gridPaneDialogArr.add(lab, 2, 4);
-
-        gridPaneDialogArr.add(btnSaveLabelAdd, 2, 5);
-
-        gridPaneDialogArr.add(btnAnnulerLabelAdd, 2, 6);
-
-
-    }
-
+    //select all list and card
     @FXML
     private void selectList() {
         grid_new.getChildren().remove(grid_new);
         grid_new = new GridPane();
-        ConnectionDb connectNow = new ConnectionDb();
-        Connection connectionDB = connectNow.connect();
+
 
 /*        String connectQuery = "select list_trello.title,id_list, card.title, card.id_card from list_trello \n" +
                 "inner join card on card.fk_id_list =list_trello.id_list\n" +
@@ -401,15 +99,13 @@ public class TableModel {
         String connectQueryLabelColor = "SELECT color ,label_card_union.fk_id_card FROM label " +
                 "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label;";
         try {
-            Statement statement = connectionDB.createStatement();
-            Statement statement1 = connectionDB.createStatement();
-            Statement statement2 = connectionDB.createStatement();
-            ResultSet queryOutput = statement.executeQuery(connectQueryIdList);
+            ResultSet queryOutput = MainApplication.getDatabase().createStatement().executeQuery(connectQueryIdList);
             while (queryOutput.next()) {
                 //LIST
                 int idList = queryOutput.getInt(1);
-                String connectQueryCard = "Select id_card, title , end_date from card where fk_id_list = " + idList;
-                ResultSet queryOutputCard = statement1.executeQuery(connectQueryCard);
+                String connectQueryCard = "Select id_card, title , end_date , importance from card where fk_id_list = " + idList;
+
+                ResultSet queryOutputCard = MainApplication.getDatabase().createStatement().executeQuery(connectQueryCard);
                 Text titleList = new Text(queryOutput.getString(2));
                 titleList.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
 
@@ -502,9 +198,7 @@ public class TableModel {
                 });
                 while (queryOutputCard.next()) {
                     //CARD
-
-                    ResultSet queryOutputLabelColor = statement2.executeQuery(connectQueryLabelColor);
-
+                    ResultSet queryOutputLabelColor = MainApplication.getDatabase().createStatement().executeQuery(connectQueryLabelColor);
                     Button btnCard = new Button();
                     btnCard.setPrefWidth(200);
                     btnCard.setPrefHeight(50);
@@ -570,11 +264,27 @@ public class TableModel {
                                 countLabelColor += 1;
                             }
                         }
+                        //select importance of card
+                        Text importance = new Text(selectTextImportance(textIdCard));
+                        importance.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 10));
+
+                        if (importance.getText().equals("Low")) {
+                            importance.setFill(Color.GREEN);
+                        }
+                        if (importance.getText().equals("Medium")) {
+                            importance.setFill(Color.ORANGE);
+                        }
+                        if (importance.getText().equals("High")) {
+                            importance.setFill(Color.RED);
+                        }
                         gridCard.add(gridLabelColorCircle, 0, countCard);
                         countCard += 1;
                         gridCard.add(gridImageMoveCard, 1, countCard);
+                        gridCard.add(importance, 1, countCard);
+
                         gridCard.add(btnCard, 0, countCard);
                         if (dateLine.getText() != null) {
+                            dateLine.setEditable(false);
                             countCard += 1;
                             gridCard.add(dateLine, 0, countCard);
                             dateLine.setAlignment(Pos.CENTER);
@@ -590,9 +300,6 @@ public class TableModel {
                                         selectList();
                                     } else {
                                         moveCard = true;
-                                        System.out.println(btnCard.getText());
-                                        System.out.println(textIdCard.getText());
-                                        System.out.println(textIdList.getText());
                                         btnSelectedId = textIdCard.getText();
                                         btnSelectedIdList = textIdList.getText();
                                         selectList();
@@ -613,66 +320,191 @@ public class TableModel {
         scrollPane.setContent(grid_new);
     }
 
-    private void saveDescriptionDialog(String textDecription, int idCard) {
-        String connectQueryUpdateDescription = "update card set discription = '" + textDecription + "' where id_card = " + idCard;
+    //select all of idcard when click into her
+    @FXML
+    public void dialogCard(Label textIdCardText, String textBtn) {
+        GridPane gridCarteDialog = new GridPane();
+        gridPaneDialogArr = new GridPane();
+        String connectQueryDescription = "select discription from card where id_card = " + Integer.parseInt(textIdCardText.getText());
+
         try {
-            ConnectionDb connectNow = new ConnectionDb();
-            Connection connectionDB = connectNow.connect();
-            Statement statement = connectionDB.createStatement();
-            statement.executeUpdate(connectQueryUpdateDescription);
+            ResultSet queryOutputDesciption = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            while (queryOutputDesciption.next()) {
+                textAreaDialogDescription.setText(queryOutputDesciption.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        selectLabel(textIdCardText);
+        selectDeadLine(textIdCardText);
+        Text titleCardDialog = new Text(textBtn);
+        titleCardDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 20));
+
+        Text titleCardDescDialog = new Text("Description");
+        titleCardDescDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
+
+        Pane paneTitleCardDescDialog = new Pane();
+        paneTitleCardDescDialog.setPrefHeight(30);
+
+        Pane paneTitleCardDescDialog2 = new Pane();
+        paneTitleCardDescDialog2.setPrefHeight(30);
+        paneTitleCardDescDialog2.setPrefWidth(200);
+
+
+        textAreaDialogDescription.setPrefHeight(100);
+        textAreaDialogDescription.setPrefWidth(300);
+        textAreaDialogDescription.setPromptText("Taper votre description...");
+
+
+        for (int i = 0; i < 8; i++) {
+            Button addDialog = new Button();
+            addDialog.setText("+");
+            addDialog.setStyle("-fx-background-color:transparent;-fx-border-width: 3px;-fx-border-color: black;-fx-border-radius:60;-fx-padding:5px;");
+            addDialog.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
+            addDialog.setPrefWidth(25);
+
+            Pane paneArr = new Pane();
+            paneArr.setPrefHeight(50);
+            paneArr.setPrefWidth(50);
+            Text titleCardDialogMembre = new Text();
+            titleCardDialogMembre.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
+            if (i == 0) {
+                titleCardDialogMembre.setText("Membres");
+            }
+            if (i == 2) {
+                gridPaneDialogArr.add(addDialog, i, 2);
+                titleCardDialogMembre.setText("Labels");
+                addDialog.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        colorPickerLabel(textIdCardText);
+                    }
+                });
+            }
+            if (i == 4) {
+                gridPaneDialogArr.add(addDialog, i, 2);
+                titleCardDialogMembre.setText("Dead Line");
+                addDialog.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        deadLine(textIdCardText);
+                    }
+                });
+            }
+            if (i == 6) {
+                titleCardDialogMembre.setText("Importance");
+                updateTextImportance(textIdCardText);
+            }
+
+            gridPaneDialogArr.add(titleCardDialogMembre, i, 0);
+            if (i != 2 && i != 4 && i != 6) {
+                gridPaneDialogArr.add(addDialog, i, 1);
+            }
+            i += 1;
+            gridPaneDialogArr.add(paneArr, i, 0);
+        }
+
+        Button btnSaveDescriptionDialog = new Button();
+        btnSaveDescriptionDialog.setText("Enregistrer");
+        btnSaveDescriptionDialog.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String textDecription = textAreaDialogDescription.getText();
+                saveDescriptionDialog(textDecription, Integer.parseInt(textIdCardText.getText()));
+            }
+        });
+        Pane rightDialog = new Pane();
+        rightDialog.setPrefWidth(200);
+        rightDialog.setPrefHeight(10);
+
+        Dialog<String> config_dialog = new Dialog<>();
+        config_dialog.getDialogPane().setPrefWidth(1000);
+        config_dialog.getDialogPane().setPrefHeight(500);
+        config_dialog.setTitle("Configuration carte");
+        Window window = config_dialog.getDialogPane().getScene().getWindow();
+        window.setOnCloseRequest((e) -> {
+            selectList();
+        });
+
+
+        GridPane gridDescription = new GridPane();
+        gridDescription.add(paneTitleCardDescDialog, 0, 0);
+        gridDescription.add(titleCardDescDialog, 0, 1);
+        gridDescription.add(paneTitleCardDescDialog2, 0, 2);
+        gridDescription.add(textAreaDialogDescription, 0, 3);
+        gridDescription.add(btnSaveDescriptionDialog, 0, 4);
+
+        gridCarteDialog.add(titleCardDialog, 0, 0);
+        gridCarteDialog.add(gridDescription, 0, 1);
+        gridCarteDialog.add(rightDialog, 1, 1);
+        gridCarteDialog.add(gridPaneDialogArr, 2, 1);
+
+
+        config_dialog.getDialogPane().setContent(gridCarteDialog);
+        config_dialog.show();
+
+    }
+
+    //select label of card in dialog
+    @FXML
+    private void selectLabel(Label textIdCardText) {
+        countLabel = 0;
+        gridPaneLabel = new GridPane();
+        String connectQueryDescription = "SELECT * FROM label " +
+                "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label WHERE label_card_union.fk_id_card = " + Integer.parseInt(textIdCardText.getText());
+        try {
+            ResultSet queryOutputLabbel = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            while (queryOutputLabbel.next()) {
+                final TextField lab = new TextField(queryOutputLabbel.getString(2));
+                lab.setStyle("-fx-background-color: " + queryOutputLabbel.getString(3) + "; -fx-border-width: 1px;-fx-border-color: white;");
+                lab.setEditable(false);
+                gridPaneLabel.add(lab, 2, countLabel);
+                countLabel += 1;
+            }
+            gridPaneDialogArr.add(gridPaneLabel, 2, 1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    //select deadLine of card in dialog
     @FXML
-    private void createCard(GridPane finalGridList, int idList) {
-        if (checkAddCard) {
-            GridPane gridSaveCard = new GridPane();
-            TextField cardTitle = new TextField();
-            Button btnSaveTitleCard = new Button();
-            Button btnAnnulerTitleCard = new Button();
-            cardTitle.setPromptText("Titre de votre carte...");
-            btnSaveTitleCard.setText("Enregistrer");
+    public void selectDeadLine(Label textIdCardText) {
+        gridPaneDateLine = new GridPane();
+        String connectQueryDescription = "SELECT end_date FROM card  WHERE id_card = " + Integer.parseInt(textIdCardText.getText());
+        try {
 
-            btnSaveTitleCard.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    if (!cardTitle.getText().equals("")) {
-                        System.out.println(idList);
-                        String connectQuery = "INSERT INTO card (title,fk_id_list) VALUES ('" + cardTitle.getText() + "'," + idList + ");";
-                        try {
-                            ConnectionDb connectNow = new ConnectionDb();
-                            Connection connectionDB = connectNow.connect();
-                            Statement statement = connectionDB.createStatement();
-                            statement.executeUpdate(connectQuery);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    checkAddCard = false;
-                    finalGridList.getChildren().remove(gridSaveCard);
-                    finalGridList.setPrefWidth(200);
-                    selectList();
+            ResultSet queryOutputLabbel = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            while (queryOutputLabbel.next()) {
+                final TextField lab = new TextField(queryOutputLabbel.getString(1));
+                lab.setEditable(false);
+                if (!Objects.equals(lab.getText(), null)) {
+                    gridPaneDateLine.add(lab, 0, 0);
+                    gridPaneDialogArr.add(gridPaneDateLine, 4, 1);
                 }
-            });
-
-            btnAnnulerTitleCard.setText("Annuler");
-            btnAnnulerTitleCard.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    finalGridList.getChildren().remove(gridSaveCard);
-                    checkAddCard = false;
-                }
-            });
-            gridSaveCard.add(cardTitle, 0, 0);
-            gridSaveCard.add(btnSaveTitleCard, 0, 1);
-            gridSaveCard.add(btnAnnulerTitleCard, 0, 2);
-            finalGridList.add(gridSaveCard, 1, 7);
-            scrollPane.setContent(grid_new);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
+    //select importance of card
+    @FXML
+    private String selectTextImportance(Label textIdCardText) {
+        String importanceString = "";
+        String connectQueryDescription = "SELECT importance FROM card  WHERE id_card = " + Integer.parseInt(textIdCardText.getText());
+        try {
+            ResultSet queryOutputImportance = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            while (queryOutputImportance.next()) {
+                importanceString = queryOutputImportance.getString(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return importanceString;
+    }
+
+    //Create List empty
     @FXML
     public void addList() {
         if (checkAddList) {
@@ -704,13 +536,10 @@ public class TableModel {
             buttonAddList.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    ConnectionDb connectNow = new ConnectionDb();
-                    Connection connectionDB = connectNow.connect();
                     if (!titleField.getText().isEmpty()) {
                         String connectQuery = "INSERT INTO list_trello (title,fk_id_table) VALUES ('" + titleField.getText() + "',1);";
                         try {
-                            Statement statement = connectionDB.createStatement();
-                            statement.executeUpdate(connectQuery);
+                            MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -734,4 +563,245 @@ public class TableModel {
             scrollPane.setContent(grid_new);
         }
     }
+
+    //Create card into list
+    @FXML
+    private void createCard(GridPane finalGridList, int idList) {
+        if (checkAddCard) {
+            GridPane gridSaveCard = new GridPane();
+            TextField cardTitle = new TextField();
+            Button btnSaveTitleCard = new Button();
+            Button btnAnnulerTitleCard = new Button();
+            cardTitle.setPromptText("Titre de votre carte...");
+            btnSaveTitleCard.setText("Enregistrer");
+
+            btnSaveTitleCard.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    if (!cardTitle.getText().equals("")) {
+                        System.out.println(idList);
+                        String connectQuery = "INSERT INTO card (title,fk_id_list) VALUES ('" + cardTitle.getText() + "'," + idList + ");";
+                        try {
+                            MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    checkAddCard = false;
+                    finalGridList.getChildren().remove(gridSaveCard);
+                    finalGridList.setPrefWidth(200);
+                    selectList();
+                }
+            });
+
+            btnAnnulerTitleCard.setText("Annuler");
+            btnAnnulerTitleCard.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    finalGridList.getChildren().remove(gridSaveCard);
+                    checkAddCard = false;
+                }
+            });
+            gridSaveCard.add(cardTitle, 0, 0);
+            gridSaveCard.add(btnSaveTitleCard, 0, 1);
+            gridSaveCard.add(btnAnnulerTitleCard, 0, 2);
+            finalGridList.add(gridSaveCard, 1, 7);
+            scrollPane.setContent(grid_new);
+        }
+    }
+
+    //update deadline of card
+    @FXML
+    public void deadLine(Label textIdCard) {
+        Button btnAnnulerDate = new Button("Annuler");
+        Button btnSaveDateAdd = new Button("Enregistrer");
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(convertToLocalDateViaInstant(new Date()));
+
+
+        btnAnnulerDate.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gridPaneDialogArr.getChildren().remove(datePicker);
+                gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
+                gridPaneDialogArr.getChildren().remove(btnSaveDateAdd);
+            }
+        });
+        btnSaveDateAdd.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                String connectQuery = "UPDATE card  SET end_date = '" + datePicker.getValue() + "' WHERE id_card = " + Integer.parseInt(textIdCard.getText()) + ";";
+                try {
+                    MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+
+                    gridPaneDialogArr.getChildren().remove(datePicker);
+                    gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
+                    gridPaneDialogArr.getChildren().remove(btnSaveDateAdd);
+                    selectDeadLine(textIdCard);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        gridPaneDialogArr.add(datePicker, 4, 3);
+
+        gridPaneDialogArr.add(btnSaveDateAdd, 4, 4);
+
+        gridPaneDialogArr.add(btnAnnulerDate, 4, 5);
+
+    }
+
+    //update importace of the card
+    @FXML
+    private void updateTextImportance(Label textIdCardText) {
+
+        ArrayList<String> arrCheckbox = new ArrayList<>();
+        String importanceString = selectTextImportance(textIdCardText);
+
+        for (Importance importanceEnum : Importance.values()) {
+            arrCheckbox.add(importanceEnum.getTitle());
+        }
+        final int maxCount = 1;
+        final Set<CheckBox> activeBoxes = new LinkedHashSet<>();
+
+        ChangeListener<Boolean> listener = (o, oldValue, newValue) -> {
+            // get checkbox containing property
+            CheckBox cb = (CheckBox) ((ReadOnlyProperty) o).getBean();
+            if (newValue) {
+                activeBoxes.add(cb);
+                if (activeBoxes.size() > maxCount) {
+                    // get first checkbox to be activated
+                    String connectQueryUpdateImportance = "UPDATE card  SET importance = '" + cb.getText() + "' WHERE id_card = " + Integer.parseInt(textIdCardText.getText()) + ";";
+                    try {
+                        MainApplication.getDatabase().createStatement().executeUpdate(connectQueryUpdateImportance);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    cb = activeBoxes.iterator().next();
+
+                    // unselect; change listener will remove
+                    cb.setSelected(false);
+                }
+            } else {
+                activeBoxes.remove(cb);
+            }
+        };
+        VBox root = new VBox();
+        // create checkboxes
+        for (String checkbox : arrCheckbox) {
+            CheckBox cb = new CheckBox(checkbox);
+            if (cb.getText().equals(importanceString)) {
+                activeBoxes.add(cb);
+                cb.setSelected(true);
+            }
+            cb.selectedProperty().addListener(listener);
+            root.getChildren().add(cb);
+        }
+        gridPaneDialogArr.add(root, 6, 1);
+    }
+
+    //add label in label table with fk id card
+    @FXML
+    private void colorPickerLabel(Label textIdCardText) {
+
+        Button btnAnnulerLabelAdd = new Button("Annuler");
+        Button btnSaveLabelAdd = new Button("Enregistrer");
+
+        final ColorPicker colorPicker = new ColorPicker();
+        colorPicker.setValue(Color.RED);
+
+        final TextField lab = new TextField("");
+        lab.setStyle("-fx-background-color: " + toRGBCode(colorPicker.getValue()));
+
+        colorPicker.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                lab.setStyle("-fx-background-color: " + toRGBCode(colorPicker.getValue()));
+            }
+        });
+        btnAnnulerLabelAdd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gridPaneDialogArr.getChildren().remove(colorPicker);
+                gridPaneDialogArr.getChildren().remove(lab);
+                gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
+                gridPaneDialogArr.getChildren().remove(btnSaveLabelAdd);
+            }
+        });
+        btnSaveLabelAdd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String connectQueryFkLabel = "";
+                String connectQuery = "INSERT INTO label (title,color) VALUES (' " + lab.getText() + "', '" + toRGBCode(colorPicker.getValue()) + "') ;";
+                String lastIdInsert = "SELECT LAST_INSERT_ID();";
+                try {
+                    MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+                    ResultSet queryOutputLastId = MainApplication.getDatabase().createStatement().executeQuery(lastIdInsert);
+                    while (queryOutputLastId.next()) {
+                        connectQueryFkLabel = "INSERT INTO label_card_union (fk_id_label,fk_id_card) " +
+                                "VALUES ( " + Integer.parseInt(queryOutputLastId.getString(1)) + " , " + Integer.parseInt(textIdCardText.getText()) + ") ;";
+                    }
+                    MainApplication.getDatabase().createStatement().executeUpdate(connectQueryFkLabel);
+                    gridPaneDialogArr.getChildren().remove(colorPicker);
+                    gridPaneDialogArr.getChildren().remove(lab);
+                    gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
+                    gridPaneDialogArr.getChildren().remove(btnSaveLabelAdd);
+                    selectLabel(textIdCardText);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        gridPaneDialogArr.add(colorPicker, 2, 3);
+
+        gridPaneDialogArr.add(lab, 2, 4);
+
+        gridPaneDialogArr.add(btnSaveLabelAdd, 2, 5);
+
+        gridPaneDialogArr.add(btnAnnulerLabelAdd, 2, 6);
+
+    }
+
+    //update description of card
+    private void saveDescriptionDialog(String textDecription, int idCard) {
+        String connectQueryUpdateDescription = "update card set discription = '" + textDecription + "' where id_card = " + idCard;
+        try {
+            MainApplication.getDatabase().createStatement().executeUpdate(connectQueryUpdateDescription);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //update fk_id_list in card for move in new list
+    private void updateCardOfList(String idList, String textIdCard) {
+        Integer idCard = Integer.parseInt(textIdCard);
+        String connectQuery = "update card set fk_id_list = '" + idList + "' where id_card = " + idCard + " ;";
+        try {
+            MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        moveCard = false;
+        selectList();
+    }
+
+    //FUNCTION GENERAL
+    //convert Color into hex string
+    public String toRGBCode(Color color) {
+        return String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
+    }
+
+    // convert Date into localDate for datePicker dateLine
+    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
 }
