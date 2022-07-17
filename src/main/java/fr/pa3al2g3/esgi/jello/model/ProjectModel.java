@@ -14,8 +14,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
@@ -38,30 +36,28 @@ public class ProjectModel {
     private GridPane gridFavoris;
     private String projetName;
     private GridPane gridGroups;
+    public static int projectId;
 
 
     public ProjectModel() {
         this.gridFavoris = new GridPane();
-
     }
 
-    public void init(int projectId){
-
+    public void init(int projectId) {
         setProjectName(projectId);
         setFavorite(projectId);
         setGroups(projectId);
-
     }
 
-    private void setGroups(int projectId) {
+    public void setGroups(int projectId) {
         // CHARGEMENT DES GROUPES // chargement des scrollpanes
-
+        ProjectModel.projectId = projectId;
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
         ScrollPane scrollGroupV = (ScrollPane) MainApplication.getScene().lookup("#groups");
         GridPane gridAllGroups = new GridPane();
         String selectQueryGroupes = "SELECT DISTINCT `group`.title, id_group FROM `group` \n" +
-                "WHERE `group`.fk_id_project_trello =" + projectId +";";
+                "WHERE `group`.fk_id_project_trello =" + projectId + ";";
         try {
             Statement statement = conn.createStatement();
             ResultSet queryOutput = statement.executeQuery(selectQueryGroupes);
@@ -81,7 +77,7 @@ public class ProjectModel {
 
                 gridButton.add(gridText, 0, 0);
 
-                setTables(groupid, gridButton);
+                setTables(groupid, gridButton, projectId);
 
 
                 //scrollGroupH.setPrefHeight(225);
@@ -91,34 +87,31 @@ public class ProjectModel {
 
                 countGroup += 1;
             }
-        }catch (SQLException throwables){
+        } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
         scrollGroupV.setContent(gridAllGroups);
     }
 
-    private void setTables(int groupid, GridPane gridButton) {
+    private void setTables(int groupid, GridPane gridButton, int projectId) {
 
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
-        String selectQuerytables = "SELECT table_trello.title, favorites FROM table_trello \n" +
-                "WHERE table_trello.fk_id_group =" + groupid +";";
+        String selectQuerytables = "SELECT id_table, table_trello.title, favorites FROM table_trello \n" +
+                "WHERE table_trello.fk_id_group =" + groupid + ";";
         try {
             Statement statement2 = conn.createStatement();
             ResultSet queryOutput2 = statement2.executeQuery(selectQuerytables);
             int count2 = 0;
             while (queryOutput2.next()) {
-
-
-
-
+                int tableId = queryOutput2.getInt("id_table");
                 InputStream stream = new FileInputStream("src/main/java/fr/pa3al2g3/esgi/jello/asset/favoris.png");
                 Image favorisimage = new Image(stream);
                 ImageView favorisImg = new ImageView();
                 favorisImg.setImage(favorisimage);
                 favorisImg.setFitHeight(45);
                 favorisImg.setFitWidth(45);
-                GridPane.setMargin(favorisImg, new Insets(20,20,0,0));
+                GridPane.setMargin(favorisImg, new Insets(20, 20, 0, 0));
                 GridPane.setHalignment(favorisImg, HPos.RIGHT);
                 GridPane.setValignment(favorisImg, VPos.TOP);
 
@@ -127,17 +120,31 @@ public class ProjectModel {
                 favorisButton.setPrefHeight(45);
                 favorisButton.setPrefWidth(45);
                 favorisButton.setOpacity(0);
-                GridPane.setMargin(favorisButton, new Insets(20,20,0,0));
+                GridPane.setMargin(favorisButton, new Insets(20, 20, 0, 0));
                 GridPane.setHalignment(favorisButton, HPos.RIGHT);
                 GridPane.setValignment(favorisButton, VPos.TOP);
-
+                favorisButton.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        try {
+                            ConnectionDb connectNow = new ConnectionDb();
+                            Connection conn = connectNow.connect();
+                            String updateQuery = "UPDATE table_trello SET favorites = 1 WHERE id_table = " + tableId + ";";
+                            Statement statement5 = conn.createStatement();
+                            statement5.executeUpdate(updateQuery);
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
+                        init(projectId);
+                    }
+                });
                 Button tabButton = new Button();
                 tabButton.setPrefWidth(300);
                 tabButton.setPrefHeight(225);
                 tabButton.setStyle("-fx-background-color: #ff9161; -fx-background-radius: 25");
                 tabButton.setText(queryOutput2.getString("title"));
                 tabButton.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 24));
-                tabButton.setOnAction( new EventHandler<ActionEvent>() {
+                tabButton.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
                         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("table.fxml"));
@@ -152,7 +159,7 @@ public class ProjectModel {
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                        MainApplication.getModelManager().getTableModel().init();
+                        MainApplication.getModelManager().getTableModel().init(projectId);
                     }
                 });
                 Pane empty = new Pane();
@@ -169,12 +176,11 @@ public class ProjectModel {
 
             gridButton.add(gridGroups, 0, 1);
 
-        }catch (SQLException | FileNotFoundException throwables){
+        } catch (SQLException | FileNotFoundException throwables) {
             throwables.printStackTrace();
         }
 
     }
-
 
     private void setFavorite(int projectId) {
 
@@ -183,8 +189,8 @@ public class ProjectModel {
         // CHARGEMENT DES FAVORIS
         ScrollPane scrollFavoris = (ScrollPane) MainApplication.getScene().lookup("#favoris");
         gridFavoris.setPrefHeight(225);
-        String selectQueryFavorites = "SELECT table_trello.title, `group`.title as groupTitle, table_trello.favorites FROM table_trello \n" +
-                "INNER JOIN `group` ON `group`.fk_id_project_trello =" + projectId + "\n"+
+        String selectQueryFavorites = "SELECT id_table, table_trello.title, `group`.title as groupTitle, table_trello.favorites FROM table_trello \n" +
+                "INNER JOIN `group` ON `group`.fk_id_project_trello =" + projectId + "\n" +
                 "AND table_trello.fk_id_group = `group`.id_group\n" +
                 "WHERE table_trello.favorites = true;";
         try {
@@ -194,7 +200,7 @@ public class ProjectModel {
             while (queryOutput.next()) {
                 Pane empty = new Pane();
                 empty.setPrefWidth(50);
-
+                int tableId = queryOutput.getInt("id_table");
                 // image favoris jaune
                 InputStream stream = new FileInputStream("src/main/java/fr/pa3al2g3/esgi/jello/asset/favorisjaune.png");
                 Image favorisjauneimage = new Image(stream);
@@ -202,7 +208,7 @@ public class ProjectModel {
                 favorisjaune.setImage(favorisjauneimage);
                 favorisjaune.setFitHeight(45);
                 favorisjaune.setFitWidth(45);
-                GridPane.setMargin(favorisjaune, new Insets(20,20,0,0));
+                GridPane.setMargin(favorisjaune, new Insets(20, 20, 0, 0));
                 GridPane.setHalignment(favorisjaune, HPos.RIGHT);
                 GridPane.setValignment(favorisjaune, VPos.TOP);
 
@@ -211,10 +217,9 @@ public class ProjectModel {
                 favorisButton.setPrefHeight(45);
                 favorisButton.setPrefWidth(45);
                 favorisButton.setOpacity(0);
-                GridPane.setMargin(favorisButton, new Insets(20,20,0,0));
+                GridPane.setMargin(favorisButton, new Insets(20, 20, 0, 0));
                 GridPane.setHalignment(favorisButton, HPos.RIGHT);
                 GridPane.setValignment(favorisButton, VPos.TOP);
-
 
                 // carte Table trello
                 Button tabButton = new Button();
@@ -223,7 +228,7 @@ public class ProjectModel {
                 tabButton.setStyle("-fx-background-color: #ff9161; -fx-background-radius: 25");
                 tabButton.setText(queryOutput.getString("title"));
                 tabButton.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 24));
-                tabButton.setOnAction( new EventHandler<ActionEvent>() {
+                tabButton.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
                         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("table.fxml"));
@@ -238,17 +243,35 @@ public class ProjectModel {
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                        MainApplication.getModelManager().getTableModel().init();
+                        MainApplication.getModelManager().getTableModel().init(projectId);
                     }
                 });
                 // ajout dans le scroll pane
                 gridFavoris.add(empty, count, 0);
-                count +=1;
+                count += 1;
                 gridFavoris.add(tabButton, count, 0);
                 gridFavoris.add(favorisjaune, count, 0);
-                gridFavoris.add(favorisButton, count , 0);
+                gridFavoris.add(favorisButton, count, 0);
                 count += 1;
+                favorisButton.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        System.out.println(tableId);
+                        try {
+                            ConnectionDb connectNow = new ConnectionDb();
+                            Connection conn = connectNow.connect();
+                            String updateQuery = "UPDATE table_trello SET favorites = 0 WHERE id_table = " + tableId + ";";
+                            Statement statement6 = conn.createStatement();
+                            statement6.executeUpdate(updateQuery);
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
+                        gridFavoris.getChildren().clear();
+                        init(projectId);
+                    }
+                });
             }
+
         } catch (SQLException | FileNotFoundException throwables) {
             throwables.printStackTrace();
         }

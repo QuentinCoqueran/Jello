@@ -73,7 +73,7 @@ public class HomeController {
             if (dialogButton == btnOk) {
                 ConnectionDb connectNow = new ConnectionDb();
                 Connection conn = connectNow.connect();
-                String selectQuery = "SELECT id FROM project_trello WHERE projectName = '" + projectName.getText() + "'";
+                String selectQuery = "SELECT id_project_trello FROM project_trello WHERE projectName = '" + projectName.getText() + "'";
                 boolean exist = false;
 
                 try {
@@ -89,8 +89,6 @@ public class HomeController {
                 }
 
                 if(!exist){
-
-
                     try {
                         String insertQuery = "INSERT INTO project_trello (projectName) VALUE ('"+ projectName.getText() + "')";
                         Statement statement = conn.createStatement();

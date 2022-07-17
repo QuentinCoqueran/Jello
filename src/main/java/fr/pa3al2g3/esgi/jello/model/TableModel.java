@@ -72,7 +72,11 @@ public class TableModel {
     private TextField titleField;
     private ChangeListener<Boolean> listener;
 
-    public void init() {
+
+    public static int projectId;
+
+    public void init(int projectId) {
+        TableModel.projectId = projectId;
         scrollPane = (ScrollPane) MainApplication.getScene().lookup("#main_scrollbar");
         scrollPane.getStyleClass().add("edge-to-edge");
         scrollPane.setStyle("-fx-background-color: #FFE4B5;-fx-background: #FFE4B5");
@@ -357,6 +361,7 @@ public class TableModel {
 
 
         for (int i = 0; i < 8; i++) {
+
             Button addDialog = new Button();
             addDialog.setText("+");
             addDialog.setStyle("-fx-background-color:transparent;-fx-border-width: 3px;-fx-border-color: black;-fx-border-radius:60;-fx-padding:5px;");
@@ -367,10 +372,9 @@ public class TableModel {
             paneArr.setPrefHeight(50);
             paneArr.setPrefWidth(50);
             Text titleCardDialogMembre = new Text();
+
             titleCardDialogMembre.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 12));
-            if (i == 0) {
-                titleCardDialogMembre.setText("Membres");
-            }
+
             if (i == 2) {
                 gridPaneDialogArr.add(addDialog, i, 2);
                 titleCardDialogMembre.setText("Labels");
@@ -397,7 +401,7 @@ public class TableModel {
             }
 
             gridPaneDialogArr.add(titleCardDialogMembre, i, 0);
-            if (i != 2 && i != 4 && i != 6) {
+            if (i != 0 && i != 2 && i != 4 && i != 6) {
                 gridPaneDialogArr.add(addDialog, i, 1);
             }
             i += 1;
