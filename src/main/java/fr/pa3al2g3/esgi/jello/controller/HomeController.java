@@ -3,8 +3,6 @@ package fr.pa3al2g3.esgi.jello.controller;
 import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -20,21 +18,28 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
+import java.awt.Desktop;
 
 public class HomeController {
     private int projectId;
     private HashMap<String, GridPane> hmap;
     private boolean alertFlag;
+    private Desktop desktop = Desktop.getDesktop();
+    public interface Compte {
+         public void main();
+    }
 
     @FXML
-    public void onCreateButtonClick(ActionEvent event){
+    public void onCreateButtonClick(ActionEvent event) {
         alertFlag = false;
         projectId = -1;
         Dialog<String> dialog = new Dialog<>();
@@ -61,9 +66,9 @@ public class HomeController {
         dialog.getDialogPane().getButtonTypes().addAll(btnOk, btnCancel);
 
         projectName.textProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue.matches("^[a-zA-Z][a-zA-Z0-9_-]+$")){
+            if (newValue.matches("^[a-zA-Z][a-zA-Z0-9_-]+$")) {
                 dialog.getDialogPane().lookupButton(btnOk).setDisable(false);
-            }else{
+            } else {
                 dialog.getDialogPane().lookupButton(btnOk).setDisable(true);
             }
         });
@@ -88,14 +93,13 @@ public class HomeController {
                     throwables.printStackTrace();
                 }
 
-                if(!exist){
+                if (!exist) {
                     try {
-                        String insertQuery = "INSERT INTO project_trello (projectName) VALUE ('"+ projectName.getText() + "')";
+                        String insertQuery = "INSERT INTO project_trello (projectName) VALUE ('" + projectName.getText() + "')";
                         Statement statement = conn.createStatement();
                         statement.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
-                        ResultSet rs= statement.getGeneratedKeys();
-                        if (rs.next())
-                        {
+                        ResultSet rs = statement.getGeneratedKeys();
+                        if (rs.next()) {
                             projectId = (int) rs.getLong(1);
                         }
                     } catch (SQLException throwables) {
@@ -103,7 +107,7 @@ public class HomeController {
                     }
 
                     return projectName.getText();
-                }else {
+                } else {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Information");
 
@@ -119,12 +123,12 @@ public class HomeController {
 
         Optional<String> result = dialog.showAndWait();
 
-        while(alertFlag){ // Tant que le dialog ce ferme à cause de l'alerte, on réouvre le dialog
+        while (alertFlag) { // Tant que le dialog ce ferme à cause de l'alerte, on réouvre le dialog
             alertFlag = false;
             result = dialog.showAndWait();
         }
 
-        result.ifPresent(str ->{
+        result.ifPresent(str -> {
             FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.getInstance().getResource("project-view.fxml"));
             Parent root;
             try {
@@ -146,7 +150,7 @@ public class HomeController {
     }
 
     @FXML
-    public void onClickConfigButton(ActionEvent event){
+    public void onClickConfigButton(ActionEvent event) {
         this.hmap = new HashMap<>();
         Dialog<String> config_dialog = new Dialog<>();
         config_dialog.getDialogPane().setPrefWidth(1500); // changer valeur
@@ -177,9 +181,7 @@ public class HomeController {
         grid.add(gridLeft, 0, 0);
 
         ArrayList<String> testList = new ArrayList<String>();
-        testList.add("abc");
-        testList.add("def");
-        testList.add("ghi");
+        testList.add("Plugin");
 
 
         GridPane gridScrollPane = new GridPane();
@@ -189,7 +191,7 @@ public class HomeController {
 
         int cpt = 0;
 
-        for (String s : testList){
+        for (String s : testList) {
             /*Pane emptyLeft = new Pane();
             emptyLeft.setPrefWidth(68);
             emptyLeft.setPrefHeight(30);*/
@@ -200,7 +202,8 @@ public class HomeController {
             btn.setPrefWidth(150);
             //btn.setPadding(new Insets(10));
             btn.setOnAction(new EventHandler<ActionEvent>() {
-                @Override public void handle(ActionEvent e) {
+                @Override
+                public void handle(ActionEvent e) {
                     rightGrid.getChildren().remove(0);
                     GridPane gridConfig = hmap.get(btn.getText());
                     rightGrid.add(gridConfig, 0, 0);
@@ -244,23 +247,43 @@ public class HomeController {
         config_dialog.showAndWait();
     }
 
-    public void initHmap(){
+    public void initHmap() {
+
+        Stage primaryStage = new Stage();
+        FileChooser fileChooser = new FileChooser();
         GridPane testGrid = new GridPane();
-        testGrid.setPrefHeight(25);
-        testGrid.setPrefWidth(25);
+        testGrid.setPrefHeight(250);
+        testGrid.setPrefWidth(250);
         testGrid.setStyle("-fx-background-color: pink");
-        this.hmap.put("abc", testGrid);
+        Button button1 = new Button("Select One File and Open");
+        final URL[] url = new URL[1];
+        button1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                File file = fileChooser.showOpenDialog(primaryStage);
+                if (file != null) {
+                    openFile(file);
+                    List<File> files = Arrays.asList(file);
+                    try {
+                        url[0] = new URL(files.get(0).toURI().toString());
+                        URLClassLoader ucl = new URLClassLoader(new URL[] {url[0]});
+                         Class<?extends Compte> test = (Class<?extends Compte>) Class.forName("Main", true, ucl).newInstance();
+                        System.out.println(test);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
 
-        GridPane test2Grid = new GridPane();
-        test2Grid.setPrefHeight(100);
-        test2Grid.setPrefWidth(100);
-        test2Grid.setStyle("-fx-background-color: yellow");
-        this.hmap.put("def", test2Grid);
-
-        GridPane test3Grid = new GridPane();
-        test3Grid.setPrefHeight(50);
-        test3Grid.setPrefWidth(50);
-        test3Grid.setStyle("-fx-background-color: blue");
-        this.hmap.put("ghi", test3Grid);
+                }
+            }
+        });
+        testGrid.add(button1, 0, 0);
+        this.hmap.put("Plugin", testGrid);
+    }
+    private void openFile(File file) {
+        try {
+            this.desktop.open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -2,16 +2,17 @@ package fr.pa3al2g3.esgi.jello.model;
 
 import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -45,6 +46,7 @@ public class ProjectModel {
 
     public void init(int projectId) {
         setProjectName(projectId);
+
         setFavorite(projectId);
         setGroups(projectId);
     }
@@ -159,12 +161,11 @@ public class ProjectModel {
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                        MainApplication.getModelManager().getTableModel().init(projectId);
+                        MainApplication.getModelManager().getTableModel().init(projectId,tableId);
                     }
                 });
                 Pane empty = new Pane();
                 empty.setPrefWidth(50);
-
 
                 gridGroups.add(empty, count2, 1);
                 count2 += 1;
@@ -173,8 +174,60 @@ public class ProjectModel {
                 gridGroups.add(favorisButton, count2, 1);
                 count2 += 1;
             }
+            Button buttonAddTable = new Button();
+            buttonAddTable.setText("Ajouter une table");
+            buttonAddTable.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    Dialog<String> dialog = new Dialog<>();
+                    dialog.getDialogPane().setPrefWidth(250);
+                    dialog.setTitle("Nouvelle table");
 
+                    GridPane gridPane = new GridPane();
+
+                    Text txt = new Text("Entrer le nom de votre table");
+
+                    TextField projectName = new TextField();
+                    Platform.runLater(projectName::requestFocus);
+                    projectName.setText("Nouvelle table");
+
+                    gridPane.addRow(0, txt);
+                    gridPane.setAlignment(Pos.CENTER);
+                    gridPane.setVgap(10);
+                    gridPane.addRow(1, projectName);
+                    dialog.getDialogPane().setContent(gridPane);
+
+                    ButtonType btnOk = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+                    ButtonType btnCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    dialog.getDialogPane().getButtonTypes().addAll(btnOk, btnCancel);
+
+                    projectName.textProperty().addListener((observable, oldValue, newValue) -> {
+                        dialog.getDialogPane().lookupButton(btnOk).setDisable(!newValue.matches("^[a-zA-Z][a-zA-Z0-9_-]+$"));
+                    });
+
+
+                    dialog.setResultConverter(dialogButton -> {
+                        if (dialogButton == btnOk) {
+                            ConnectionDb connectNow = new ConnectionDb();
+                            Connection conn = connectNow.connect();
+                            try {
+                                String insertQuery = "INSERT INTO table_trello (title,fk_id_group) VALUE ('" + projectName.getText() + "','" + groupid + "')";
+                                Statement statement = conn.createStatement();
+                                statement.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
+                                statement.getGeneratedKeys();
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        }
+                        return null;
+                    });
+                    dialog.showAndWait();
+                    init(projectId);
+                }
+            });
             gridButton.add(gridGroups, 0, 1);
+            gridButton.add(buttonAddTable, 1, 1);
 
         } catch (SQLException | FileNotFoundException throwables) {
             throwables.printStackTrace();
@@ -183,12 +236,12 @@ public class ProjectModel {
     }
 
     private void setFavorite(int projectId) {
-
+        gridFavoris.getChildren().clear();
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
         // CHARGEMENT DES FAVORIS
         ScrollPane scrollFavoris = (ScrollPane) MainApplication.getScene().lookup("#favoris");
-        gridFavoris.setPrefHeight(225);
+        gridFavoris.setPrefHeight(600);
         String selectQueryFavorites = "SELECT id_table, table_trello.title, `group`.title as groupTitle, table_trello.favorites FROM table_trello \n" +
                 "INNER JOIN `group` ON `group`.fk_id_project_trello =" + projectId + "\n" +
                 "AND table_trello.fk_id_group = `group`.id_group\n" +
@@ -243,7 +296,7 @@ public class ProjectModel {
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                        MainApplication.getModelManager().getTableModel().init(projectId);
+                        MainApplication.getModelManager().getTableModel().init(projectId,tableId);
                     }
                 });
                 // ajout dans le scroll pane
@@ -275,7 +328,7 @@ public class ProjectModel {
         } catch (SQLException | FileNotFoundException throwables) {
             throwables.printStackTrace();
         }
-        scrollFavoris.setPrefHeight(225);
+        scrollFavoris.setPrefHeight(600);
         scrollFavoris.setContent(gridFavoris);
     }
 

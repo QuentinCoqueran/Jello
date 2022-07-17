@@ -116,7 +116,7 @@
                   <Insets />
                </GridPane.margin>
             </Text>
-            <Text stroke="BLACK" text="Ouvrez un projet déjà existant dans l’explorateur de fichier" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+            <Text stroke="BLACK" text="Installer un plugin" GridPane.halignment="CENTER" GridPane.rowIndex="3">
                <font>
                   <Font name="Roboto Light" size="20.0" />
                </font>
