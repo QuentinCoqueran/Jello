@@ -1,6 +1,7 @@
 package fr.pa3al2g3.esgi.jello.model;
 
 
+import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
 import fr.pa3al2g3.esgi.jello.enumerator.Importance;
 import javafx.beans.property.ReadOnlyProperty;
@@ -31,9 +32,11 @@ import javafx.stage.Window;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -74,9 +77,11 @@ public class TableModel {
 
 
     public static int projectId;
+    public static int tableId;
 
-    public void init(int projectId) {
+    public void init(int projectId, int tableId) {
         TableModel.projectId = projectId;
+        TableModel.tableId = tableId;
         scrollPane = (ScrollPane) MainApplication.getScene().lookup("#main_scrollbar");
         scrollPane.getStyleClass().add("edge-to-edge");
         scrollPane.setStyle("-fx-background-color: #FFE4B5;-fx-background: #FFE4B5");
@@ -88,28 +93,27 @@ public class TableModel {
     private void selectList() {
         grid_new.getChildren().remove(grid_new);
         grid_new = new GridPane();
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
 
+        String connectQueryIdList = "select id_list, list_trello.title from list_trello \n" +
+                "where fk_id_table = " + TableModel.tableId + " order by id_list;";
 
-/*        String connectQuery = "select list_trello.title,id_list, card.title, card.id_card from list_trello \n" +
-                "inner join card on card.fk_id_list =list_trello.id_list\n" +
-                "where fk_id_table = 1\n" +
-                "UNION\n" +
-                "select list_trello.title,id_list,'','' from list_trello\n" +
-                "where fk_id_table = 1 order by id_list;";
-                */
-        String connectQueryIdList = "Select distinct id_list,title from list_trello;";
+        /* String connectQueryIdList = "Select distinct id_list,title from list_trello;";*/
 
 
         String connectQueryLabelColor = "SELECT color ,label_card_union.fk_id_card FROM label " +
                 "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label;";
         try {
-            ResultSet queryOutput = MainApplication.getDatabase().createStatement().executeQuery(connectQueryIdList);
+            Statement statement = connectionDB.createStatement();
+            ResultSet queryOutput = statement.executeQuery(connectQueryIdList);
             while (queryOutput.next()) {
                 //LIST
                 int idList = queryOutput.getInt(1);
                 String connectQueryCard = "Select id_card, title , end_date , importance from card where fk_id_list = " + idList;
+                Statement statement2 = connectionDB.createStatement();
+                ResultSet queryOutputCard = statement2.executeQuery(connectQueryCard);
 
-                ResultSet queryOutputCard = MainApplication.getDatabase().createStatement().executeQuery(connectQueryCard);
                 Text titleList = new Text(queryOutput.getString(2));
                 titleList.setFont(Font.font("system", FontWeight.BOLD, FontPosture.REGULAR, 15));
 
@@ -202,7 +206,9 @@ public class TableModel {
                 });
                 while (queryOutputCard.next()) {
                     //CARD
-                    ResultSet queryOutputLabelColor = MainApplication.getDatabase().createStatement().executeQuery(connectQueryLabelColor);
+                    Statement statement3 = connectionDB.createStatement();
+                    ResultSet queryOutputLabelColor = statement3.executeQuery(connectQueryLabelColor);
+
                     Button btnCard = new Button();
                     btnCard.setPrefWidth(200);
                     btnCard.setPrefHeight(50);
@@ -327,12 +333,17 @@ public class TableModel {
     //select all of idcard when click into her
     @FXML
     public void dialogCard(Label textIdCardText, String textBtn) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+
         GridPane gridCarteDialog = new GridPane();
         gridPaneDialogArr = new GridPane();
         String connectQueryDescription = "select discription from card where id_card = " + Integer.parseInt(textIdCardText.getText());
 
         try {
-            ResultSet queryOutputDesciption = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            Statement statement4 = connectionDB.createStatement();
+            ResultSet queryOutputDesciption = statement4.executeQuery(connectQueryDescription);
+
             while (queryOutputDesciption.next()) {
                 textAreaDialogDescription.setText(queryOutputDesciption.getString(1));
             }
@@ -452,12 +463,17 @@ public class TableModel {
     //select label of card in dialog
     @FXML
     private void selectLabel(Label textIdCardText) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+
         countLabel = 0;
         gridPaneLabel = new GridPane();
         String connectQueryDescription = "SELECT * FROM label " +
                 "INNER JOIN label_card_union  ON label.id_label  = label_card_union.fk_id_label WHERE label_card_union.fk_id_card = " + Integer.parseInt(textIdCardText.getText());
         try {
-            ResultSet queryOutputLabbel = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            Statement statement5 = connectionDB.createStatement();
+            ResultSet queryOutputLabbel = statement5.executeQuery(connectQueryDescription);
+
             while (queryOutputLabbel.next()) {
                 final TextField lab = new TextField(queryOutputLabbel.getString(2));
                 lab.setStyle("-fx-background-color: " + queryOutputLabbel.getString(3) + "; -fx-border-width: 1px;-fx-border-color: white;");
@@ -474,11 +490,15 @@ public class TableModel {
     //select deadLine of card in dialog
     @FXML
     public void selectDeadLine(Label textIdCardText) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+
         gridPaneDateLine = new GridPane();
         String connectQueryDescription = "SELECT end_date FROM card  WHERE id_card = " + Integer.parseInt(textIdCardText.getText());
         try {
+            Statement statement6 = connectionDB.createStatement();
+            ResultSet queryOutputLabbel = statement6.executeQuery(connectQueryDescription);
 
-            ResultSet queryOutputLabbel = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
             while (queryOutputLabbel.next()) {
                 final TextField lab = new TextField(queryOutputLabbel.getString(1));
                 lab.setEditable(false);
@@ -495,10 +515,15 @@ public class TableModel {
     //select importance of card
     @FXML
     private String selectTextImportance(Label textIdCardText) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+
         String importanceString = "";
         String connectQueryDescription = "SELECT importance FROM card  WHERE id_card = " + Integer.parseInt(textIdCardText.getText());
         try {
-            ResultSet queryOutputImportance = MainApplication.getDatabase().createStatement().executeQuery(connectQueryDescription);
+            Statement statement6= connectionDB.createStatement();
+            ResultSet queryOutputImportance = statement6.executeQuery(connectQueryDescription);
+
             while (queryOutputImportance.next()) {
                 importanceString = queryOutputImportance.getString(1);
             }
@@ -540,10 +565,13 @@ public class TableModel {
             buttonAddList.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
+                    ConnectionDb connectNow = new ConnectionDb();
+                    Connection connectionDB = connectNow.connect();
                     if (!titleField.getText().isEmpty()) {
-                        String connectQuery = "INSERT INTO list_trello (title,fk_id_table) VALUES ('" + titleField.getText() + "',1);";
+                        String connectQuery = "INSERT INTO list_trello (title,fk_id_table) VALUES ('" + titleField.getText() + "'," + TableModel.tableId + ");";
                         try {
-                            MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+                            Statement statement6= connectionDB.createStatement();
+                            statement6.executeUpdate(connectQuery);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -571,6 +599,8 @@ public class TableModel {
     //Create card into list
     @FXML
     private void createCard(GridPane finalGridList, int idList) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
         if (checkAddCard) {
             GridPane gridSaveCard = new GridPane();
             TextField cardTitle = new TextField();
@@ -586,7 +616,8 @@ public class TableModel {
                         System.out.println(idList);
                         String connectQuery = "INSERT INTO card (title,fk_id_list) VALUES ('" + cardTitle.getText() + "'," + idList + ");";
                         try {
-                            MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+                            Statement statement6= connectionDB.createStatement();
+                            statement6.executeUpdate(connectQuery);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -617,6 +648,9 @@ public class TableModel {
     //update deadline of card
     @FXML
     public void deadLine(Label textIdCard) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+
         Button btnAnnulerDate = new Button("Annuler");
         Button btnSaveDateAdd = new Button("Enregistrer");
         DatePicker datePicker = new DatePicker();
@@ -637,7 +671,8 @@ public class TableModel {
             public void handle(ActionEvent event) {
                 String connectQuery = "UPDATE card  SET end_date = '" + datePicker.getValue() + "' WHERE id_card = " + Integer.parseInt(textIdCard.getText()) + ";";
                 try {
-                    MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+                    Statement statement7= connectionDB.createStatement();
+                    statement7.executeUpdate(connectQuery);
 
                     gridPaneDialogArr.getChildren().remove(datePicker);
                     gridPaneDialogArr.getChildren().remove(btnAnnulerDate);
@@ -660,7 +695,8 @@ public class TableModel {
     //update importace of the card
     @FXML
     private void updateTextImportance(Label textIdCardText) {
-
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
         ArrayList<String> arrCheckbox = new ArrayList<>();
         String importanceString = selectTextImportance(textIdCardText);
 
@@ -679,7 +715,8 @@ public class TableModel {
                     // get first checkbox to be activated
                     String connectQueryUpdateImportance = "UPDATE card  SET importance = '" + cb.getText() + "' WHERE id_card = " + Integer.parseInt(textIdCardText.getText()) + ";";
                     try {
-                        MainApplication.getDatabase().createStatement().executeUpdate(connectQueryUpdateImportance);
+                        Statement statement8= connectionDB.createStatement();
+                        statement8.executeUpdate(connectQueryUpdateImportance);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -709,6 +746,8 @@ public class TableModel {
     //add label in label table with fk id card
     @FXML
     private void colorPickerLabel(Label textIdCardText) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
 
         Button btnAnnulerLabelAdd = new Button("Annuler");
         Button btnSaveLabelAdd = new Button("Enregistrer");
@@ -741,13 +780,20 @@ public class TableModel {
                 String connectQuery = "INSERT INTO label (title,color) VALUES (' " + lab.getText() + "', '" + toRGBCode(colorPicker.getValue()) + "') ;";
                 String lastIdInsert = "SELECT LAST_INSERT_ID();";
                 try {
-                    MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
-                    ResultSet queryOutputLastId = MainApplication.getDatabase().createStatement().executeQuery(lastIdInsert);
+                    Statement statement12= connectionDB.createStatement();
+                    statement12.executeUpdate(connectQuery);
+
+                    Statement statement13= connectionDB.createStatement();
+                    ResultSet queryOutputLastId = statement13.executeQuery(lastIdInsert);
+
                     while (queryOutputLastId.next()) {
                         connectQueryFkLabel = "INSERT INTO label_card_union (fk_id_label,fk_id_card) " +
                                 "VALUES ( " + Integer.parseInt(queryOutputLastId.getString(1)) + " , " + Integer.parseInt(textIdCardText.getText()) + ") ;";
                     }
-                    MainApplication.getDatabase().createStatement().executeUpdate(connectQueryFkLabel);
+
+                    Statement statement9= connectionDB.createStatement();
+                    statement9.executeUpdate(connectQueryFkLabel);
+
                     gridPaneDialogArr.getChildren().remove(colorPicker);
                     gridPaneDialogArr.getChildren().remove(lab);
                     gridPaneDialogArr.getChildren().remove(btnAnnulerLabelAdd);
@@ -771,9 +817,12 @@ public class TableModel {
 
     //update description of card
     private void saveDescriptionDialog(String textDecription, int idCard) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
         String connectQueryUpdateDescription = "update card set discription = '" + textDecription + "' where id_card = " + idCard;
         try {
-            MainApplication.getDatabase().createStatement().executeUpdate(connectQueryUpdateDescription);
+            Statement statement10= connectionDB.createStatement();
+            statement10.executeUpdate(connectQueryUpdateDescription);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -781,10 +830,14 @@ public class TableModel {
 
     //update fk_id_list in card for move in new list
     private void updateCardOfList(String idList, String textIdCard) {
+        ConnectionDb connectNow = new ConnectionDb();
+        Connection connectionDB = connectNow.connect();
+
         Integer idCard = Integer.parseInt(textIdCard);
         String connectQuery = "update card set fk_id_list = '" + idList + "' where id_card = " + idCard + " ;";
         try {
-            MainApplication.getDatabase().createStatement().executeUpdate(connectQuery);
+            Statement statement11= connectionDB.createStatement();
+            statement11.executeUpdate(connectQuery);
         } catch (Exception e) {
             e.printStackTrace();
         }

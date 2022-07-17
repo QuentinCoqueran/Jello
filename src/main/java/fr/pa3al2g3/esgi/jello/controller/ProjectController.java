@@ -39,7 +39,7 @@ public class ProjectController {
     public void onClickCreateGroup(ActionEvent event) {
         Dialog<String> dialog = new Dialog<>();
         dialog.getDialogPane().setPrefWidth(250);
-        dialog.setTitle("Nouveau projet");
+        dialog.setTitle("Nouveau groupe");
 
         GridPane gridPane = new GridPane();
 

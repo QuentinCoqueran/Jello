@@ -10,6 +10,7 @@ module fr.pa3al2g3.esgi.jello {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires java.sql;
+    requires java.desktop;
     //requires mysql.connector.java;
 
     opens fr.pa3al2g3.esgi.jello to javafx.fxml;
