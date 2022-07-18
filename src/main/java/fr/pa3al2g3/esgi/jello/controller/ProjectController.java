@@ -33,7 +33,7 @@ public class ProjectController {
         MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
         MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
         MainApplication.getStage().setMaximized(true);
-        MainApplication.getModelManager().getHomeModel().init();
+        MainApplication.getModelManager().getHomeModel().init(HomeModel.userId);
     }
 
     public void onClickCreateGroup(ActionEvent event) {

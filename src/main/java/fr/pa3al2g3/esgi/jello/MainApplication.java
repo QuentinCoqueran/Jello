@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class MainApplication extends Application {
+public class MainApplication  {
     private static Stage stage;
     private static Rectangle2D screenBounds;
 
@@ -25,13 +25,12 @@ public class MainApplication extends Application {
     private static ModelManager modelManager;
     private static Connection dbConnection;
 
-    @Override
-    public void start(Stage stage) throws IOException, URISyntaxException, SQLException {
+    public static void start(Stage stage) throws IOException, URISyntaxException, SQLException {
         MainApplication.dbConnection = new DatabaseManager().getDb();
-        MainApplication.instance = getClass();
+        MainApplication.instance = MainApplication.class;
         MainApplication.stage = stage;
         MainApplication.modelManager = new ModelManager();
-        Parent root = FXMLLoader.load(getClass().getResource("connection-view.fxml"));
+        Parent root = FXMLLoader.load(MainApplication.class.getResource("connection-view.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
         //stage.setMaximized(true);
@@ -78,7 +77,4 @@ public class MainApplication extends Application {
         MainApplication.window = window;
     }
 
-    public static void main (String[]args){
-        launch();
-    }
 }

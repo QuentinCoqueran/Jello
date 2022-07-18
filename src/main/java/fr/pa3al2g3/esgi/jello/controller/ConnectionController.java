@@ -55,11 +55,13 @@ public class ConnectionController {
         Connection connectionDB = connectNow.connect();
         String connectQuery = "SELECT * from users WHERE pseudo = '" + pseudoText + "' AND password = '" + passwordText + "'";
         boolean empty = true;
+        int userId = 0;
         try {
             Statement statement = connectionDB.createStatement();
             ResultSet queryOutput = statement.executeQuery(connectQuery);
             while (queryOutput.next()) {
                 //ResultSet processing here
+                userId = queryOutput.getInt("id_user");
                 empty = false;
             }
             if (empty) {
@@ -73,7 +75,7 @@ public class ConnectionController {
                 MainApplication.getStage().setWidth(MainApplication.getScreenBounds().getWidth());
                 MainApplication.setWindow(MainApplication.getStage().getScene().getWindow());
                 MainApplication.getStage().setMaximized(true);
-                MainApplication.getModelManager().getHomeModel().init();
+                MainApplication.getModelManager().getHomeModel().init(userId);
             }
         } catch (Exception e) {
             e.printStackTrace();

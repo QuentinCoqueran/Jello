@@ -2,6 +2,7 @@ package fr.pa3al2g3.esgi.jello.controller;
 
 import fr.pa3al2g3.esgi.jello.ConnectionDb;
 import fr.pa3al2g3.esgi.jello.MainApplication;
+import fr.pa3al2g3.esgi.jello.model.HomeModel;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -34,8 +35,9 @@ public class HomeController {
     private HashMap<String, GridPane> hmap;
     private boolean alertFlag;
     private Desktop desktop = Desktop.getDesktop();
+
     public interface Compte {
-         public void main();
+        public void main();
     }
 
     @FXML
@@ -94,8 +96,10 @@ public class HomeController {
                 }
 
                 if (!exist) {
+                    int userId = HomeModel.userId;
                     try {
-                        String insertQuery = "INSERT INTO project_trello (projectName) VALUE ('" + projectName.getText() + "')";
+                        String insertQuery = "INSERT INTO project_trello (projectName,id_user) VALUE ('" + projectName.getText() + "'," + userId + ")";
+                        System.out.println(insertQuery);
                         Statement statement = conn.createStatement();
                         statement.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
                         ResultSet rs = statement.getGeneratedKeys();
@@ -266,10 +270,10 @@ public class HomeController {
                     List<File> files = Arrays.asList(file);
                     try {
                         url[0] = new URL(files.get(0).toURI().toString());
-                        URLClassLoader ucl = new URLClassLoader(new URL[] {url[0]});
-                         Class<?extends Compte> test = (Class<?extends Compte>) Class.forName("Main", true, ucl).newInstance();
+                        URLClassLoader ucl = new URLClassLoader(new URL[]{url[0]});
+                        Class<? extends Compte> test = (Class<? extends Compte>) Class.forName("Main", true, ucl).newInstance();
                         System.out.println(test);
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -279,6 +283,7 @@ public class HomeController {
         testGrid.add(button1, 0, 0);
         this.hmap.put("Plugin", testGrid);
     }
+
     private void openFile(File file) {
         try {
             this.desktop.open(file);

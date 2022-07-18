@@ -39,10 +39,10 @@ public class HomeModel {
     public void addProject(String projectName) {
         this.projects.add(projectName);
     }
-
-    public void init() {
+    public static int userId;
+    public void init(int userId) {
+        HomeModel.userId = userId;
         initList();
-
         TextField search = (TextField) MainApplication.getScene().lookup("#search_bar");
         search.textProperty().addListener((observable, oldValue, newValue) -> {
             projects = allProjects;
@@ -60,11 +60,12 @@ public class HomeModel {
     }
 
     private void initList(){
+
         allProjects.clear();
         projects.clear();
         ConnectionDb connectNow = new ConnectionDb();
         Connection conn = connectNow.connect();
-        String selectQuery = "SELECT projectName FROM project_trello";
+        String selectQuery = "SELECT projectName FROM project_trello WHERE id_user = " + userId;
         try {
             Statement statement = conn.createStatement();
             ResultSet queryOutput = statement.executeQuery(selectQuery);
